@@ -8,6 +8,7 @@ const Tweener = imports.ui.tweener;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const PopupDialog = Me.imports.popup_dialog;
 
 const DESCRIPTION_MIN_SCALE = 0.9;
 const DESCRIPTION_ANIMATION_TIME = 0.2;
@@ -17,6 +18,56 @@ const IMAGE_MAX_SCALE = 1.3;
 const IMAGE_ANIMATION_TIME = 0.3;
 
 const DUMMY_ICON_SIZE = 80;
+
+const CopiedUrlLabel = new Lang.Class({
+    Name: 'CopiedUrlLabel',
+    Extends: PopupDialog.PopupDialog,
+
+    _init: function(text, x, y) {
+        this.parent({
+            style_class: 'grilo-copy-url-label',
+            modal: false
+        });
+
+        let label = new St.Label({
+            text: text
+        });
+        this.actor.add_child(label);
+
+        this._x = x;
+        this._y = y;
+    },
+
+    show: function() {
+        this._reposition(this._x, this._y);
+
+        this.actor.set_pivot_point(0.5, 0.5);
+        this.actor.set_scale(0.7, 0.7);
+        this.actor.set_opacity(0);
+        this.actor.show();
+
+        Tweener.addTween(this.actor, {
+            time: 0.4,
+            scale_x: 1,
+            scale_y: 1,
+            opacity: 255,
+            transition: 'easeInExpo',
+            onComplete: Lang.bind(this, function() {
+                Tweener.addTween(this.actor, {
+                    delay: 0.9,
+                    time: 0.4,
+                    scale_x: 1.7,
+                    scale_y: 1.7,
+                    opacity: 0,
+                    transition: 'easeInExpo',
+                    onComplete: Lang.bind(this, function() {
+                        this.destroy();
+                    })
+                });
+            })
+        });
+    }
+});
 
 const ResultViewBase = new Lang.Class({
     Name: 'ResultViewBase',
@@ -243,6 +294,9 @@ const ResultViewBase = new Lang.Class({
             this.emit('clicked', button);
             return;
         }
+        else if(button === Clutter.BUTTON_SECONDARY) {
+            this.copy_url_to_clipboard();
+        }
     },
 
     _on_enter: function() {
@@ -317,6 +371,15 @@ const ResultViewBase = new Lang.Class({
                 this._description_box.set_opacity(255);
             })
         });
+    },
+
+    copy_url_to_clipboard: function() {
+        let clipboard = St.Clipboard.get_default();
+        clipboard.set_text(St.ClipboardType.CLIPBOARD, this._media.external_url);
+
+        let [x, y] = global.get_pointer();
+        let animated_label = new CopiedUrlLabel(this._media.external_url, x, y);
+        animated_label.show();
     },
 
     set_width: function(width) {

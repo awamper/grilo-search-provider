@@ -18,7 +18,8 @@ const MessageResultView = new Lang.Class({
             width: 320,
             height: 180,
             actor_style_class: 'grilo-result-box',
-            table_style_class: 'grilo-content-box'
+            table_style_class: 'grilo-content-box',
+            show_description: false
         };
         this.parent(null, params);
 

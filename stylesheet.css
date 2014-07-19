@@ -1,0 +1,68 @@
+.grilo-results-box {
+    /* nothing */
+}
+
+.grilo-result-box {
+    transition-duration: 500ms;
+    padding: 0px 5px 10px 5px;
+}
+
+.grilo-content-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #C2C2C2;
+    transition-duration: 300ms;
+}
+
+.grilo-content-box:hover {
+    /* nothing */
+}
+
+.grilo-content-box:active {
+    color: white;
+}
+
+.grilo-extract-box {
+    padding-left: 7px;
+}
+
+.grilo-title {
+    font-size: 15px;
+    font-style: bold;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 3px;
+}
+
+/*.grilo-clone-background {
+    padding: 1px;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.grilo-clone-background-dark {
+    padding: 1px;
+    background-color: rgba(255, 255, 255, 0.7);
+}*/
+
+.grilo-youtube-description, .grilo-vimeo-description {
+    font-size: 13px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2px;
+}
+
+.grilo-youtube-rating-box {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.grilo-youtube-likes {
+    background-color: #1b7fcc;
+}
+
+.grilo-youtube-dislikes {
+    background-color: #ccc;
+}
+
+.grilo-youtube-duration-label, .grilo-vimeo-duration-label {
+    padding: 2px;
+    font-size: 10px;
+    color: #ccc;
+    background-color: rgba(0, 0, 0, 0.7);
+}

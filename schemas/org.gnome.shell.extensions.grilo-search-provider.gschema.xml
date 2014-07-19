@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-extensions">
+
+  <schema path="/org/gnome/shell/extensions/grilo-search-provider/" id="org.gnome.shell.extensions.grilo-search-provider">
+
+    <key type="i" name="search-timeout">
+        <default>700</default>
+    </key>
+
+    <key type="s" name="keyword">
+      <default>"g"</default>
+    </key>
+
+  </schema>
+</schemalist>

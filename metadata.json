@@ -1,0 +1,11 @@
+{
+  "description": "Search Youtube, Vimeo and Flickr",
+  "name": "Grilo Search Provider",
+  "shell-version": [
+      "3.12"
+  ],
+  "url": "https://github.com/awamper/grilo-search-provider",
+  "uuid": "grilo_search_provider@awamper.gmail.com",
+  "settings-schema": "org.gnome.shell.extensions.grilo-search-provider",
+  "version": 0
+}

@@ -32,16 +32,6 @@
     padding: 3px;
 }
 
-/*.grilo-clone-background {
-    padding: 1px;
-    background-color: rgba(255, 255, 255, 0.7);
-}
-
-.grilo-clone-background-dark {
-    padding: 1px;
-    background-color: rgba(255, 255, 255, 0.7);
-}*/
-
 .grilo-youtube-description, .grilo-vimeo-description {
     font-size: 13px;
     background-color: rgba(0, 0, 0, 0.7);

@@ -34,12 +34,6 @@ const FlickrResultView = new Lang.Class({
             y_fill: false
         });
         this._title.hide();
-
-        this.connect('thumbnail-loaded',
-            Lang.bind(this, function() {
-                this.set_width(this._image_actor.width);
-            })
-        );
     },
 
     _show_title: function() {
@@ -66,7 +60,7 @@ const FlickrResultView = new Lang.Class({
             })
         });
     },
- 
+
     _on_enter: function() {
         this._show_title();
         this.parent();

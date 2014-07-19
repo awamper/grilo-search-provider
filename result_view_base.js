@@ -256,6 +256,8 @@ const ResultViewBase = new Lang.Class({
     },
 
     _zoom_thumb_in: function() {
+        if(!this._image_actor) return;
+
         Tweener.removeTweens(this._image_actor);
         Tweener.addTween(this._image_actor, {
             time: IMAGE_ANIMATION_TIME,
@@ -266,6 +268,8 @@ const ResultViewBase = new Lang.Class({
     },
 
     _zoom_thumb_out: function() {
+        if(!this._image_actor) return;
+
         Tweener.removeTweens(this._image_actor);
         Tweener.addTween(this._image_actor, {
             time: IMAGE_ANIMATION_TIME,
@@ -276,9 +280,9 @@ const ResultViewBase = new Lang.Class({
     },
 
     _show_description: function() {
+        if(!this.params.show_description) return;
         if(Utils.is_blank(this._media.description)) return;
         if(this._description_box.visible) return;
-        if(!this.params.show_description) return;
 
         this._description_box.set_opacity(0);
         this._description_box.set_scale(
@@ -298,6 +302,7 @@ const ResultViewBase = new Lang.Class({
     },
 
     _hide_description: function() {
+        if(!this.params.show_description) return;
         if(!this._description_box.visible) return;
 
         Tweener.removeTweens(this._description_box);

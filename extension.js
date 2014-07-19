@@ -1,10 +1,10 @@
 const Lang = imports.lang;
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
-// const Gio = imports.gi.Gio;
+const Gio = imports.gi.Gio;
 const Grl = imports.gi.Grl;
 const Clutter = imports.gi.Clutter;
-// const Tweener = imports.ui.tweener;
+const Tweener = imports.ui.tweener;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
@@ -296,8 +296,39 @@ const GriloSearchProvider = new Lang.Class({
         this._grilo_display.add_result(display);
     },
 
-    _on_activate: function(object, result) {
-        log('activate ' + result.media.external_url);
+    _animate_activation: function(result_view) {
+        Main.overview.toggle();
+        [x, y] = result_view.actor.get_transformed_position();
+        let clone = new Clutter.Clone({
+            source: result_view.actor,
+            width: result_view.actor.width,
+            height: result_view.actor.height,
+            x: x,
+            y: y
+        });
+        clone.set_pivot_point(0.5, 0.5);
+        Main.uiGroup.add_child(clone);
+
+        Tweener.addTween(clone, {
+            opacity: 0,
+            scale_x: 1.5,
+            scale_y: 1.5,
+            time: 0.5,
+            transition: 'easeInExpo',
+            onComplete: Lang.bind(this, function() {
+                clone.destroy();
+            })
+        });
+    },
+
+    _on_activate: function(object, result_view) {
+        if(!result_view.media.external_url) return;
+
+        Gio.app_info_launch_default_for_uri(
+            result_view.media.external_url,
+            global.create_app_launch_context(0, -1)
+        );
+        this._animate_activation(result_view);
     },
 
     _insert_display: function() {

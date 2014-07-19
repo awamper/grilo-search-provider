@@ -69,6 +69,7 @@ const GriloSearchProvider = new Lang.Class({
     Name: "GriloSearchProvider",
 
     _init: function() {
+        this._configure_plugins();
         this._overview_search_results =
             Main.overview.viewSelector._searchResults;
 
@@ -95,36 +96,32 @@ const GriloSearchProvider = new Lang.Class({
             );
     },
 
-    _init_grilo: function() {
-        Grl.init(null, null);
-        this._registry = Grl.Registry.get_default();
-
+    _configure_plugins: function() {
         let youtube_config = Grl.Config.new(PLUGIN_IDS.YOUTUBE, null);
         youtube_config.set_api_key(ApiKeys.YOUTUBE_KEY);
-        this._registry.add_config(youtube_config, null);
+        Grl.Registry.get_default().add_config(youtube_config, null);
 
         let vimeo_config = Grl.Config.new(PLUGIN_IDS.VIMEO, null);
         vimeo_config.set_api_key(ApiKeys.VIMEO_KEY);
         vimeo_config.set_api_secret(ApiKeys.VIMEO_SECRET);
-        this._registry.add_config(vimeo_config)
+        Grl.Registry.get_default().add_config(vimeo_config);
 
         let flickr_config = Grl.Config.new(PLUGIN_IDS.FLICKR, null);
         flickr_config.set_api_key(ApiKeys.FLICKR_KEY);
         flickr_config.set_api_secret(ApiKeys.FLICKR_SECRET);
-        this._registry.add_config(flickr_config);
-
-
-        this._registry.load_plugin_by_id(PLUGIN_IDS.YOUTUBE);
-        this._registry.load_plugin_by_id(PLUGIN_IDS.VIMEO);
-        this._registry.load_plugin_by_id(PLUGIN_IDS.FLICKR);
+        Grl.Registry.get_default().add_config(flickr_config);
     },
 
-    _deinit_grilo: function() {
-        this._registry.unload_plugin(PLUGIN_IDS.YOUTUBE);
-        this._registry.unload_plugin(PLUGIN_IDS.VIMEO)
-        this._registry.unload_plugin(PLUGIN_IDS.FLICKR);
+    _load_plugins: function() {
+        Grl.Registry.get_default().load_plugin_by_id(PLUGIN_IDS.YOUTUBE);
+        Grl.Registry.get_default().load_plugin_by_id(PLUGIN_IDS.VIMEO);
+        Grl.Registry.get_default().load_plugin_by_id(PLUGIN_IDS.FLICKR);
+    },
 
-        Grl.deinit();
+    _unload_plugins: function() {
+        Grl.Registry.get_default().unload_plugin(PLUGIN_IDS.YOUTUBE);
+        Grl.Registry.get_default().unload_plugin(PLUGIN_IDS.VIMEO)
+        Grl.Registry.get_default().unload_plugin(PLUGIN_IDS.FLICKR);
     },
 
     _on_key_release: function(object, event) {
@@ -255,7 +252,7 @@ const GriloSearchProvider = new Lang.Class({
         this._remove_timeout();
         if(Utils.is_blank(term)) return;
 
-        let sources = this._registry.get_sources(true)
+        let sources = Grl.Registry.get_default().get_sources(true)
         let result_sources = [];
         let result_names = [];
 
@@ -333,7 +330,7 @@ const GriloSearchProvider = new Lang.Class({
     },
 
     enable: function() {
-        this._init_grilo();
+        this._load_plugins()
     },
 
     disable: function() {
@@ -354,14 +351,14 @@ const GriloSearchProvider = new Lang.Class({
 
         this._grilo_display.destroy();
         delete this._overview_search_results;
-        this._deinit_grilo();
+        this._unload_plugins();
     }
 });
 
 let grilo_search_provider = null;
 
 function init() {
-    // nothing
+    Grl.init(null, null);
 }
 
 function enable() {

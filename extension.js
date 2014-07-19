@@ -136,7 +136,7 @@ const GriloSearchProvider = new Lang.Class({
             this.show_message("Enter your query");
         }
         else if(ch) {
-            this._start_search(query.term, query.flags);
+            this._start_search(query);
         }
     },
 
@@ -159,11 +159,12 @@ const GriloSearchProvider = new Lang.Class({
 
     _parse_query: function(terms_string) {
         let keyword = Utils.SETTINGS.get_string(PrefsKeys.KEYWORD);
-        let regexp_string = "(%s|%s-(.*?)) (.*)".format(keyword, keyword);
+        let regexp_string = '(%s|%s-(.*?)) (.*)'.format(keyword, keyword);
         let grilo_query_regexp = new RegExp(regexp_string);
         let result = {
             flags: '',
-            term: ''
+            term: '',
+            max_results: -1
         };
         if(!grilo_query_regexp.test(terms_string)) return result;
 
@@ -171,7 +172,20 @@ const GriloSearchProvider = new Lang.Class({
         let flags = matches[2];
         let term = matches[3];
         if(!Utils.is_blank(flags)) result.flags = flags.trim();
-        if(!Utils.is_blank(term)) result.term = term.trim();
+
+        if(!Utils.is_blank(term)) {
+            term = term.trim();
+            let max_results_regexp = /(.*?)\\([0-9]+)/;
+
+            if(max_results_regexp.test(term)) {
+                matches = max_results_regexp.exec(term);
+                result.term = matches[1];
+                result.max_results = parseInt(matches[2], 10);
+            }
+            else {
+                result.term = term;
+            }
+        }
 
         return result;
     },
@@ -227,16 +241,33 @@ const GriloSearchProvider = new Lang.Class({
         this._show_result(media);
     },
 
-    _search: function(term, sources) {
-        let options = Grl.OperationOptions.new(null);
-        options.set_count(7);
-        options.set_flags(
+    _get_max_results: function(query) {
+        let max_results;
+        let max_max_results = Utils.SETTINGS.get_int(PrefsKeys.MAX_MAX_RESULTS);
+
+        if(query.max_results > 0 && query.max_results <= max_max_results) {
+            max_results = query.max_results;
+        }
+        else {
+            max_results = Utils.SETTINGS.get_int(PrefsKeys.MAX_RESULTS);
+        }
+
+        return max_results;
+    },
+
+    _search: function(query, sources) {
+        let max_results = this._get_max_results(query);
+
+        let options_flags =
             Grl.ResolutionFlags.FAST_ONLY
-            | Grl.ResolutionFlags.IDLE_RELAY
-        );
+            | Grl.ResolutionFlags.IDLE_RELAY;
+
+        let options = Grl.OperationOptions.new(null);
+        options.set_count(max_results);
+        options.set_flags(options_flags);
         this._search_id = Grl.multiple_search(
             sources,
-            term,
+            query.term,
             METADATA_KEYS,
             options,
             Lang.bind(this, this._on_search_result),
@@ -244,22 +275,22 @@ const GriloSearchProvider = new Lang.Class({
         );
     },
 
-    _start_search: function(term, flags) {
+    _start_search: function(query) {
         this._n_results = 0;
         this._new_search = true;
         this._grilo_display.clear();
         this._cancel_search();
         this._remove_timeout();
-        if(Utils.is_blank(term)) return;
+        if(Utils.is_blank(query.term)) return;
 
         let sources = Grl.Registry.get_default().get_sources(true)
         let result_sources = [];
         let result_names = [];
 
-        if(flags) {
+        if(query.flags) {
             for each(let source in sources) {
                 let source_id = source.get_id();
-                if(flags.indexOf(KEYWORDS[source_id]) !== -1) {
+                if(query.flags.indexOf(KEYWORDS[source_id]) !== -1) {
                     result_sources.push(source);
                     result_names.push(PLUGIN_NAMES[source_id]);
                 }
@@ -267,7 +298,7 @@ const GriloSearchProvider = new Lang.Class({
         }
 
         this.show_message(
-            'Search %s for "%s"'.format(result_names.join(', '), term)
+            'Search %s for "%s"'.format(result_names.join(', '), query.term)
         );
 
         TIMEOUT_IDS.SEARCH = Mainloop.timeout_add(
@@ -278,10 +309,10 @@ const GriloSearchProvider = new Lang.Class({
                 this.show_message(
                     'Searching %s for "%s"...'.format(
                         result_names.join(', '),
-                        term
+                        query.term
                     )
                 );
-                this._search(term, result_sources);
+                this._search(query, result_sources);
             })
         );
     },

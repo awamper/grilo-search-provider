@@ -7,6 +7,14 @@
         <default>700</default>
     </key>
 
+    <key type="i" name="max-results">
+        <default>7</default>
+    </key>
+
+    <key type="i" name="max-max-results">
+        <default>100</default>
+    </key>
+
     <key type="s" name="keyword">
       <default>"g"</default>
     </key>

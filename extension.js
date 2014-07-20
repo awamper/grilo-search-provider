@@ -291,10 +291,35 @@ const GriloSearchProvider = new Lang.Class({
         let result_sources = [];
         let result_names = [];
 
-        if(query.flags) {
-            for each(let source in sources) {
-                let source_id = source.get_id();
+        let enable_youtube = Utils.SETTINGS.get_boolean(
+            PrefsKeys.ENABLE_YOUTUBE
+        );
+        let enable_vimeo = Utils.SETTINGS.get_boolean(
+            PrefsKeys.ENABLE_VIMEO
+        );
+        let enable_flickr = Utils.SETTINGS.get_boolean(
+            PrefsKeys.ENABLE_FLICKR
+        );
+
+        for each(let source in sources) {
+            let source_id = source.get_id();
+
+            if(query.flags) {
                 if(query.flags.indexOf(KEYWORDS[source_id]) !== -1) {
+                    result_sources.push(source);
+                    result_names.push(PLUGIN_NAMES[source_id]);
+                }
+            }
+            else {
+                if(source_id === PLUGIN_IDS.YOUTUBE && enable_youtube) {
+                    result_sources.push(source);
+                    result_names.push(PLUGIN_NAMES[source_id]);
+                }
+                if(source_id === PLUGIN_IDS.VIMEO && enable_vimeo) {
+                    result_sources.push(source);
+                    result_names.push(PLUGIN_NAMES[source_id]);
+                }
+                if(source_id === PLUGIN_IDS.FLICKR && enable_flickr) {
                     result_sources.push(source);
                     result_names.push(PLUGIN_NAMES[source_id]);
                 }

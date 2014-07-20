@@ -213,6 +213,7 @@ const GriloSearchProviderPrefsWidget = new GObject.Class({
         this.set_orientation(Gtk.Orientation.VERTICAL);
 
         let main = this._get_main_page();
+        let sources = this._get_sources_page();
 
         let stack = new Gtk.Stack({
             transition_type: Gtk.StackTransitionType.SLIDE_LEFT_RIGHT,
@@ -227,6 +228,7 @@ const GriloSearchProviderPrefsWidget = new GObject.Class({
         });
 
         stack.add_titled(main.page, main.name, main.name);
+        stack.add_titled(sources.page, sources.name, sources.name);
 
         this.add(stack_switcher);
         this.add(stack);
@@ -263,6 +265,30 @@ const GriloSearchProviderPrefsWidget = new GObject.Class({
             PrefsKeys.MAX_RESULTS,
             adjustment_properties,
             'int'
+        );
+
+        let result = {
+            name: name,
+            page: page
+        };
+        return result;
+    },
+
+    _get_sources_page: function() {
+        let name = 'Sources';
+        let page = new PrefsGrid(Utils.SETTINGS);
+
+        page.add_boolean(
+            'YouTube:',
+            PrefsKeys.ENABLE_YOUTUBE
+        );
+        page.add_boolean(
+            'Vimeo:',
+            PrefsKeys.ENABLE_VIMEO
+        );
+        page.add_boolean(
+            'Flickr:',
+            PrefsKeys.ENABLE_FLICKR
         );
 
         let result = {

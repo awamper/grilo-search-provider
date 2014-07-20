@@ -19,5 +19,17 @@
       <default>"g"</default>
     </key>
 
+    <key type="b" name="enable-youtube">
+      <default>true</default>
+    </key>
+
+    <key type="b" name="enable-vimeo">
+      <default>true</default>
+    </key>
+
+    <key type="b" name="enable-flickr">
+      <default>true</default>
+    </key>
+
   </schema>
 </schemalist>

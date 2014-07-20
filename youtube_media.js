@@ -7,6 +7,11 @@ const YoutubeMedia = new Lang.Class({
     Name: 'YoutubeMedia',
     Extends: MediaBase.MediaBase,
 
+    _init: function(grilo_media, ready_callback) {
+        this.parent(grilo_media, ready_callback);
+        this._ready_callback(this);
+    },
+
     get thumbnail() {
         let thumbnail_url = this._grilo_media.get_thumbnail();
         thumbnail_url =

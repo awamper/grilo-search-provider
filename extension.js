@@ -238,7 +238,11 @@ const GriloSearchProvider = new Lang.Class({
             this._n_results++;
         }
 
-        this._show_result(media);
+        let source_id = media.get_source();
+        let source_media = new MEDIAS[source_id](
+            media,
+            Lang.bind(this, this._show_result, source_id)
+        );
     },
 
     _get_max_results: function(query) {
@@ -317,12 +321,10 @@ const GriloSearchProvider = new Lang.Class({
         );
     },
 
-    _show_result: function(media) {
+    _show_result: function(source_media, source_id) {
         this._overview_search_results._statusBin.hide();
         this._grilo_display.show();
 
-        let source_id = media.get_source();
-        let source_media = new MEDIAS[source_id](media);
         let display = new VIEWS[source_id](source_media);
         this._grilo_display.add_result(display);
     },

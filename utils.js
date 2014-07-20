@@ -40,16 +40,16 @@ function flickr_get_photo_sizes(photo_id, callback) {
 
             try {
                 data = JSON.parse(request.response_body.data);
-
-                if(data.stat === 'ok') {
-                    callback(data.sizes.size);
-                }
-                else {
-                    callback(false);
-                }
             }
             catch(e) {
                 log('Error: flickr_get_photo_sizes(): ' + e);
+                callback(false);
+            }
+
+            if(data.stat === 'ok') {
+                callback(data.sizes.size);
+            }
+            else {
                 callback(false);
             }
         })

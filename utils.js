@@ -1,12 +1,60 @@
+const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
+const Soup = imports.gi.Soup;
 const ExtensionUtils = imports.misc.extensionUtils;
 
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const ApiKeys = Me.imports.api_keys;
+
 const SETTINGS = getSettings();
+const HTTP_SESSION = new Soup.SessionAsync();
+Soup.Session.prototype.add_feature.call(
+    HTTP_SESSION,
+    new Soup.ProxyResolverDefault()
+);
+HTTP_SESSION.user_agent = 'GNOME Shell - GriloSearchProvider';
+HTTP_SESSION.timeout = 10;
 
 const ICONS = {
     IMAGE_PLACEHOLDER: 'camera-photo-symbolic'
 };
+
+function flickr_get_photo_sizes(photo_id, callback) {
+    let base_url = 'https://api.flickr.com/services/rest';
+    let api_method = 'flickr.photos.getSizes';
+    let url =
+        '%s/?method=%s&api_key=%s' +
+        '&photo_id=%s&format=json&nojsoncallback=1';
+    url = url.format(base_url, api_method, ApiKeys.FLICKR_KEY, photo_id);
+
+    let request = Soup.Message.new('GET', url);
+    HTTP_SESSION.queue_message(request,
+        Lang.bind(this, function(http_session, message) {
+            if(message.status_code !== 200) {
+                callback(false);
+                return;
+            }
+
+            let data;
+
+            try {
+                data = JSON.parse(request.response_body.data);
+
+                if(data.stat === 'ok') {
+                    callback(data.sizes.size);
+                }
+                else {
+                    callback(false);
+                }
+            }
+            catch(e) {
+                log('Error: flickr_get_photo_sizes(): ' + e);
+                callback(false);
+            }
+        })
+    );
+}
 
 function is_pointer_inside_actor(actor, x, y) {
     let result = false;

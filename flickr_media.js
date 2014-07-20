@@ -14,5 +14,9 @@ const FlickrMedia = new Lang.Class({
         );
 
         return url;
+    },
+
+    get description() {
+        return this.title;
     }
 });

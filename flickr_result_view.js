@@ -13,12 +13,13 @@ const FlickrResultView = new Lang.Class({
         let params = {
             width: 320,
             height: 180,
+            description_height: 100,
             actor_style_class: 'grilo-result-box',
             table_style_class: 'grilo-content-box',
             title_style_class: 'grilo-title',
+            description_style_class: 'grilo-flickr-description',
             source_label_color: 'rgba(20, 230, 40, 0.7)',
-            source_label: 'flickr',
-            show_description: false
+            source_label: 'flickr'
         };
         this.parent(flickr_media, params);
 
@@ -34,40 +35,5 @@ const FlickrResultView = new Lang.Class({
             y_fill: false
         });
         this._title.hide();
-    },
-
-    _show_title: function() {
-        this._title.set_opacity(0);
-        this._title.show();
-
-        Tweener.removeTweens(this._title);
-        Tweener.addTween(this._title, {
-            time: 0.3,
-            transition: 'easeOutQuad',
-            opacity: 255
-        });
-    },
-
-    _hide_title: function() {
-        Tweener.removeTweens(this._title);
-        Tweener.addTween(this._title, {
-            time: 0.3,
-            transition: 'easeOutQuad',
-            opacity: 0,
-            onComplete: Lang.bind(this, function() {
-                this._title.hide();
-                this._title.set_opacity(255);
-            })
-        });
-    },
-
-    _on_enter: function() {
-        this._show_title();
-        this.parent();
-    },
-
-    _on_leave: function() {
-        this._hide_title();
-        this.parent();
     }
 });

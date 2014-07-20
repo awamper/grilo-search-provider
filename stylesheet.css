@@ -32,7 +32,9 @@
     padding: 3px;
 }
 
-.grilo-youtube-description, .grilo-vimeo-description {
+.grilo-youtube-description,
+.grilo-vimeo-description,
+.grilo-flickr-description {
     font-size: 13px;
     background-color: rgba(0, 0, 0, 0.7);
     padding: 2px;

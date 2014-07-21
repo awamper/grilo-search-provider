@@ -6,7 +6,7 @@ const MediaBase = Me.imports.media_base;
 
 const PHOTO_SIZES = {
     SQUARE: 'Square',
-    LARGE_SQUARE: 'Large square',
+    LARGE_SQUARE: 'Large Square',
     THUMBNAIL: 'Thumbnail',
     SMALL: 'Small',
     SMALL_320: 'Small 320',

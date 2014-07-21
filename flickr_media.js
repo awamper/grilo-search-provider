@@ -48,7 +48,6 @@ const FlickrMedia = new Lang.Class({
         Utils.flickr_get_photo_sizes(this.id,
             Lang.bind(this, function(result) {
                 if(!result) {
-                    log('not result')
                     this.sizes = new FlickrPhotoSizes({});
                 }
                 else {

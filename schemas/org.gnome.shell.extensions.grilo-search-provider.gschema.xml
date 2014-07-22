@@ -8,7 +8,7 @@
     </key>
 
     <key type="i" name="max-results">
-        <default>7</default>
+        <default>12</default>
     </key>
 
     <key type="i" name="max-max-results">

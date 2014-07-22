@@ -42,7 +42,7 @@ const RatingView = new Lang.Class({
     },
 
     _get_likes_width: function() {
-        let percent_width = this.params.width / 100;
+        let percent_width = this.actor.width / 100;
         let percent_progress =
             100 / this.params.rating_max
             * this.params.rating;
@@ -51,7 +51,7 @@ const RatingView = new Lang.Class({
     },
 
     _get_dislikes_width: function() {
-        let percent_width = this.params.width / 100;
+        let percent_width = this.actor.width / 100;
         let percent_progress =
             100 / this.params.rating_max
             * (this.params.rating_max - this.params.rating);
@@ -59,8 +59,18 @@ const RatingView = new Lang.Class({
         return result;
     },
 
+    _update: function() {
+        this._likes.set_width(this._get_likes_width());
+        this._dislikes.set_width(this._get_dislikes_width());
+    },
+
     destroy: function() {
         if(this.actor) this.actor.destroy();
+    },
+
+    set_width: function(width) {
+        this.actor.set_width(width);
+        this._update();
     }
 });
 
@@ -117,5 +127,10 @@ const YoutubeResultView = new Lang.Class({
             x_fill: false,
             y_fill: false
         });
+    },
+
+    set_width: function(width) {
+        if(this._rating) this._rating.set_width(width);
+        this.parent(width);
     }
 });

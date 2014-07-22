@@ -156,7 +156,7 @@ const GriloSearchProvider = new Lang.Class({
 
     _parse_query: function(terms_string) {
         let keyword = Utils.SETTINGS.get_string(PrefsKeys.KEYWORD);
-        let regexp_string = '(%s|%s-(.*?)) (.*)'.format(keyword, keyword);
+        let regexp_string = '(%s|%s(.*?)) (.*)'.format(keyword, keyword);
         let grilo_query_regexp = new RegExp(regexp_string);
         let result = {
             flags: '',

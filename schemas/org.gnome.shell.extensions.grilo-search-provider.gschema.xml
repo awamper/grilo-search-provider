@@ -31,5 +31,25 @@
       <default>true</default>
     </key>
 
+    <key type="i" name="results-padding-left">
+      <default>20</default>
+    </key>
+
+    <key type="i" name="results-padding-right">
+      <default>20</default>
+    </key>
+
+    <key type="i" name="results-padding-top">
+      <default>20</default>
+    </key>
+
+    <key type="i" name="results-padding-bottom">
+      <default>20</default>
+    </key>
+
+    <key type="i" name="results-spacing">
+      <default>5</default>
+    </key>
+
   </schema>
 </schemalist>

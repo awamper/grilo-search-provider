@@ -6,8 +6,8 @@ const Main = imports.ui.main;
 const Params = imports.misc.params;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-// const Utils = Me.imports.utils;
-// const PrefsKeys = Me.imports.prefs_keys;
+const Utils = Me.imports.utils;
+const PrefsKeys = Me.imports.prefs_keys;
 const ResultViewBase = Me.imports.result_view_base;
 
 const MessageResultView = new Lang.Class({
@@ -60,7 +60,11 @@ const ResultRow = new Lang.Class({
         });
 
         this.actor = new St.BoxLayout({
-            vertical: false
+            vertical: false,
+            style: 'spacing: %spx; padding-bottom: %spx;'.format(
+                Utils.SETTINGS.get_int(PrefsKeys.RESULTS_SPACING),
+                Utils.SETTINGS.get_int(PrefsKeys.RESULTS_SPACING)
+            )
         });
         this.actor.connect('destroy', Lang.bind(this, this.destroy));
 
@@ -86,7 +90,8 @@ const ResultRow = new Lang.Class({
             }
 
             this._relative_widths.push(thumb_width);
-            this._total_relative_width += thumb_width;
+            this._total_relative_width +=
+                thumb_width + Utils.SETTINGS.get_int(PrefsKeys.RESULTS_SPACING) * 2;
         }
 
         let ratio = this.params.max_width / this._total_relative_width;
@@ -145,22 +150,85 @@ const ResultsView = new Lang.Class({
     Name: 'GriloResultsView',
 
     _init: function() {
-        this.actor = new St.BoxLayout({
+        this.actor = new St.ScrollView();
+        this.actor.hide();
+
+        this._box = new St.BoxLayout({
             vertical: true,
             style_class: 'grilo-results-box'
         });
+        this.actor.add_actor(this._box);
 
         this._rows = [];
     },
 
     _make_new_row: function() {
+        let [width, height] = this._get_size();
+        let padding = this._get_padding();
+
         let row = new ResultRow({
-            max_width: Main.overview.viewSelector._searchResults._contentBin.width
+            max_width: width - padding.left - padding.right
         });
         this._rows.push(row);
-        this.actor.add_child(row.actor);
+        this._box.add(row.actor, {
+            x_expand: true,
+            y_expand: true,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.MIDDLE,
+            y_align: St.Align.MIDDLE
+        });
 
         return row;
+    },
+
+    _get_padding: function() {
+        let padding_left = Utils.SETTINGS.get_int(PrefsKeys.RESULTS_PADDING_LEFT);
+        let padding_right = Utils.SETTINGS.get_int(PrefsKeys.RESULTS_PADDING_RIGHT);
+        let padding_top = Utils.SETTINGS.get_int(PrefsKeys.RESULTS_PADDING_TOP);
+        let padding_bottom = Utils.SETTINGS.get_int(PrefsKeys.RESULTS_PADDING_BOTTOM);
+        let result = {
+            left: padding_left,
+            right: padding_right,
+            top: padding_top,
+            bottom: padding_bottom
+        };
+
+        return result;
+    },
+
+    _get_size: function() {
+        let entry = Main.overview._searchEntry;
+        let monitor = Main.layoutManager.currentMonitor;
+        let [entry_x, entry_y] = entry.get_transformed_position();
+        let padding = this._get_padding();
+
+        let width = monitor.width - padding.left - padding.right;
+        let height =
+            monitor.height -
+            padding.top -
+            padding.bottom -
+            (entry_y + entry.height);
+
+        return [width, height];
+    },
+
+    _resize: function() {
+        let [width, height] = this._get_size();
+
+        this.actor.set_width(width);
+        this.actor.set_height(height);
+    },
+
+    _reposition: function() {
+        this._resize();
+        let entry = Main.overview._searchEntry;
+        let [entry_x, entry_y] = entry.get_transformed_position();
+        let padding = this._get_padding();
+
+        let x = padding.left;
+        let y = entry_y + entry.height + padding.top;
+        this.actor.set_position(x, y);
     },
 
     add_result: function(result_view) {
@@ -183,16 +251,22 @@ const ResultsView = new Lang.Class({
     },
 
     clear: function() {
-        this.actor.destroy_all_children();
+        this._box.destroy_all_children();
         this._rows = [];
     },
 
     show: function() {
+        Main.overview.viewSelector._searchResults.actor.hide();
+        if(!Main.uiGroup.contains(this.actor)) Main.uiGroup.add_child(this.actor);
+        this._resize();
+        this._reposition();
         this.actor.show();
     },
 
     hide: function() {
+        Main.overview.viewSelector._searchResults.actor.show();
         this.actor.hide();
+        if(Main.uiGroup.contains(this.actor)) Main.uiGroup.remove_child(this.actor);
     },
 
     show_message: function(message) {

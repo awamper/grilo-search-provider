@@ -70,8 +70,6 @@ const GriloSearchProvider = new Lang.Class({
 
     _init: function() {
         this._configure_plugins();
-        this._overview_search_results =
-            Main.overview.viewSelector._searchResults;
 
         this._grilo_display = new ResultsView.ResultsView();
         this._grilo_display.connect(
@@ -146,7 +144,6 @@ const GriloSearchProvider = new Lang.Class({
             this._remove_timeout();
             this._grilo_display.clear();
             this._grilo_display.hide();
-            this._remove_display();
         }
     },
 
@@ -334,7 +331,7 @@ const GriloSearchProvider = new Lang.Class({
             Utils.SETTINGS.get_int(PrefsKeys.SEARCH_TIMEOUT),
             Lang.bind(this, function() {
                 this._remove_timeout();
-                this._insert_display();
+                this._grilo_display.show();
                 this.show_message(
                     'Searching %s for "%s"...'.format(
                         result_names.join(', '),
@@ -347,7 +344,6 @@ const GriloSearchProvider = new Lang.Class({
     },
 
     _show_result: function(source_media, source_id) {
-        this._overview_search_results._statusBin.hide();
         this._grilo_display.show();
 
         let display = new VIEWS[source_id](source_media);
@@ -389,32 +385,7 @@ const GriloSearchProvider = new Lang.Class({
         this._animate_activation(result_view);
     },
 
-    _insert_display: function() {
-        let contains = this._overview_search_results._content.contains(
-            this._grilo_display.actor
-        );
-        if(contains) this._remove_display();
-
-        this._overview_search_results._content.insert_child_at_index(
-            this._grilo_display.actor,
-            0
-        );
-    },
-
-    _remove_display: function() {
-        let contains = this._overview_search_results._content.contains(
-            this._grilo_display.actor
-        );
-        if(!contains) return;
-
-        this._overview_search_results._content.remove_child(
-            this._grilo_display.actor
-        );
-    },
-
     show_message: function(message) {
-        this._overview_search_results._statusBin.hide();
-        this._grilo_display.show();
         this._grilo_display.show_message(message);
     },
 
@@ -439,7 +410,6 @@ const GriloSearchProvider = new Lang.Class({
         }
 
         this._grilo_display.destroy();
-        delete this._overview_search_results;
         this._unload_plugins();
     }
 });

@@ -12,7 +12,7 @@
     </key>
 
     <key type="i" name="max-max-results">
-        <default>100</default>
+        <default>50</default>
     </key>
 
     <key type="s" name="keyword">

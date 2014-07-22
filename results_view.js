@@ -189,7 +189,7 @@ const ResultsView = new Lang.Class({
             y_expand: true,
             x_fill: false,
             y_fill: false,
-            x_align: St.Align.MIDDLE,
+            x_align: St.Align.START,
             y_align: St.Align.MIDDLE
         });
 

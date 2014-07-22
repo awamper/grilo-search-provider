@@ -50,6 +50,10 @@ const MessageResultView = new Lang.Class({
     }
 });
 
+const CONNECTION_IDS = {
+    OVERVIEW_HIDING: 0
+};
+
 const ResultRow = new Lang.Class({
     Name: 'GriloResultsView.ResultRow',
 
@@ -71,6 +75,11 @@ const ResultRow = new Lang.Class({
         this._items = [];
         this._relative_widths = [];
         this._total_relative_width = 0;
+
+        CONNECTION_IDS.OVERVIEW_HIDING = Main.overview.connect(
+            'hiding',
+            Lang.bind(this, this.hide)
+        );
     },
 
     _update: function() {
@@ -135,6 +144,11 @@ const ResultRow = new Lang.Class({
     },
 
     destroy: function() {
+        if(CONNECTION_IDS.OVERVIEW_HIDING > 0) {
+            Main.overview.disconnect(CONNECTION_IDS.OVERVIEW_HIDING);
+            CONNECTION_IDS.OVERVIEW_HIDING = 0;
+        }
+
         if(this.actor) this.actor.destroy();
         this._items = [];
         this._relative_widths = [];

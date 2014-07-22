@@ -81,16 +81,14 @@ const ResultViewBase = new Lang.Class({
             description_style_class: '',
             source_label_color: '',
             source_label: '',
-            width: 300,
-            height: 300,
+            real_width: 300,
+            real_height: 300,
             description_height: 100,
             thumbnail_loaded_animation: true,
             show_description: true
         });
 
         this.table = new St.Table({
-            width: this.params.width,
-            height: this.params.height,
             style_class: this.params.table_style_class,
             homogeneous: false,
             track_hover: true,
@@ -124,8 +122,7 @@ const ResultViewBase = new Lang.Class({
         if(this._media === null) return;
 
         this._title = new St.Label({
-            style_class: this.params.title_style_class,
-            width: this.params.width
+            style_class: this.params.title_style_class
         });
         this._title.clutter_text.set_single_line_mode(true);
         this._title.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
@@ -145,7 +142,6 @@ const ResultViewBase = new Lang.Class({
 
         this._description_box = new St.BoxLayout({
             style_class: this.params.description_style_class,
-            width: this.params.width,
             height: this.params.description_height
         });
         this._description_box.set_pivot_point(0.5, 0.5);
@@ -166,8 +162,8 @@ const ResultViewBase = new Lang.Class({
 
             this._image_actor = texture_cache.load_uri_async(
                 this._media.thumbnail,
-                this.params.width,
-                this.params.height,
+                this.params.real_width,
+                this.params.real_height,
                 scale_factor
             );
             this._image_actor.set_pivot_point(0.5, 0.5);
@@ -250,6 +246,9 @@ const ResultViewBase = new Lang.Class({
             x_fill: false,
             y_fill: false
         });
+
+        this.set_width(this.params.real_width);
+        this.set_height(this.params.real_height);
     },
 
     _on_thumbnail_loaded: function() {
@@ -383,13 +382,17 @@ const ResultViewBase = new Lang.Class({
     },
 
     set_width: function(width) {
-        this._title.set_width(width);
-        this._description_box.set_width(width);
+        if(this._image_actor) this._image_actor.set_width(width);
+        if(this._title) this._title.set_width(width);
+        if(this._description_box) this._description_box.set_width(width);
         this.table.set_width(width);
+        this.actor.set_width(width);
     },
 
     set_height: function(height) {
+        if(this._image_actor) this._image_actor.set_height(height);
         this.table.set_height(height);
+        this.actor.set_height(height);
     },
 
     destroy: function() {
@@ -399,6 +402,22 @@ const ResultViewBase = new Lang.Class({
 
     get media() {
         return this._media;
+    },
+
+    get width() {
+        return this.table.width;
+    },
+
+    get height() {
+        return this.table.height;
+    },
+
+    get real_width() {
+        return this.params.real_width;
+    },
+
+    get real_height() {
+        return this.params.real_height;
     }
 });
 Signals.addSignalMethods(ResultViewBase.prototype);

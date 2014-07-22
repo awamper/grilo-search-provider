@@ -70,8 +70,8 @@ const YoutubeResultView = new Lang.Class({
 
     _init: function(youtube_media) {
         let params = {
-            width: 320,
-            height: 180,
+            real_width: 320,
+            real_height: 180,
             description_height: 100,
             actor_style_class: 'grilo-result-box',
             table_style_class: 'grilo-content-box',
@@ -83,7 +83,7 @@ const YoutubeResultView = new Lang.Class({
         this.parent(youtube_media, params);
 
         this._rating = new RatingView({
-            width: this.params.width,
+            width: this.params.real_width,
             rating: this._media.rating,
             style_class: 'grilo-youtube-rating-box',
             likes_style_class: 'grilo-youtube-likes',

@@ -12,8 +12,8 @@ const VimeoResultView = new Lang.Class({
 
     _init: function(vimeo_media) {
         let params = {
-            width: 320,
-            height: 180,
+            real_width: 320,
+            real_height: 180,
             description_height: 100,
             actor_style_class: 'grilo-result-box',
             table_style_class: 'grilo-content-box',

@@ -4,15 +4,20 @@ const Tweener = imports.ui.tweener;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const ResultViewBase = Me.imports.result_view_base;
+const FlickrMedia = Me.imports.flickr_media;
 
 const FlickrResultView = new Lang.Class({
     Name: 'FlickrResultView',
     Extends: ResultViewBase.ResultViewBase,
 
     _init: function(flickr_media) {
+        let size_info = flickr_media.sizes.get(
+            FlickrMedia.PHOTO_SIZE.SMALL_320
+        );
+
         let params = {
-            width: 320,
-            height: 180,
+            real_width: size_info.width,
+            real_height: size_info.height,
             description_height: 100,
             actor_style_class: 'grilo-result-box',
             table_style_class: 'grilo-content-box',

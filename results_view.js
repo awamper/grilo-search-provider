@@ -2,7 +2,8 @@ const St = imports.gi.St;
 const Lang = imports.lang;
 const Signals = imports.signals;
 const Separator = imports.ui.separator;
-// const Main = imports.ui.main;
+const Main = imports.ui.main;
+const Params = imports.misc.params;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 // const Utils = Me.imports.utils;
@@ -15,8 +16,8 @@ const MessageResultView = new Lang.Class({
 
     _init: function(message) {
         let params = {
-            width: 320,
-            height: 180,
+            real_width: 320,
+            real_height: 180,
             actor_style_class: 'grilo-result-box',
             table_style_class: 'grilo-content-box',
             show_description: false
@@ -49,6 +50,97 @@ const MessageResultView = new Lang.Class({
     }
 });
 
+const ResultRow = new Lang.Class({
+    Name: 'GriloResultsView.ResultRow',
+
+    _init: function(params) {
+        this.params = Params.parse(params, {
+            max_width: 960,
+            default_height: 200
+        });
+
+        this.actor = new St.BoxLayout({
+            vertical: false
+        });
+        this.actor.connect('destroy', Lang.bind(this, this.destroy));
+
+        this._items = [];
+        this._relative_widths = [];
+        this._total_relative_width = 0;
+    },
+
+    _update: function() {
+        this._relative_widths = [];
+        this._total_relative_width = 0;
+
+        if(this.n_items == 1) return;
+
+        for each(let item in this._items) {
+            let thumb_width = item.real_width;
+            let thumb_height = item.real_height;
+
+            if(thumb_height != this.params.default_height) {
+                thumb_width = Math.floor(
+                    thumb_width * (this.params.default_height / thumb_height)
+                );
+            }
+
+            this._relative_widths.push(thumb_width);
+            this._total_relative_width += thumb_width;
+        }
+
+        let ratio = this.params.max_width / this._total_relative_width;
+
+        for (let i in this._items) {
+            let item = this._items[i];
+            let relative_width = this._relative_widths[i];
+
+            let thumb_width = Math.floor(relative_width * ratio);
+            let thumb_height = Math.floor(this.params.default_height * ratio);
+
+            item.set_width(thumb_width);
+            item.set_height(thumb_height);
+        }
+    },
+
+    has_place_for: function(result_view) {
+        if(this._total_relative_width * 1.1 < this.params.max_width) return true;
+        else return false;
+    },
+
+    add: function(result_view) {
+        this.actor.add(result_view.actor, {
+            x_expand: false,
+            y_expand: false,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.START,
+            y_align: St.Align.MIDDLE
+        });
+        this._items.push(result_view);
+        this._update();
+    },
+
+    show: function() {
+        this.actor.show();
+    },
+
+    hide: function() {
+        this.actor.hide();
+    },
+
+    destroy: function() {
+        if(this.actor) this.actor.destroy();
+        this._items = [];
+        this._relative_widths = [];
+        this._total_relative_width = null;
+    },
+
+    get n_items() {
+        return this._items.length;
+    }
+});
+
 const ResultsView = new Lang.Class({
     Name: 'GriloResultsView',
 
@@ -58,37 +150,29 @@ const ResultsView = new Lang.Class({
             style_class: 'grilo-results-box'
         });
 
-        this._table = new St.Table({
-            homogeneous: false
-        });
-        this._separator = new Separator.HorizontalSeparator({
-            style_class: 'search-section-separator'
-        });
-
-        this.actor.add(this._table);
-        this.actor.add_child(this._separator.actor);
+        this._rows = [];
     },
 
-    add_result: function(result) {
-        let max_columns = 3;
-        let row = this._table.row_count - 1;
-        let column = this._table.get_n_children() % max_columns;
-        if(column === 0) row++;
-
-        this._table.add(result.actor, {
-            row: row,
-            col: column,
-            x_expand: false,
-            y_expand: false,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.START,
-            y_align: St.Align.MIDDLE
+    _make_new_row: function() {
+        let row = new ResultRow({
+            max_width: Main.overview.viewSelector._searchResults._contentBin.width
         });
+        this._rows.push(row);
+        this.actor.add_child(row.actor);
 
-        result.connect("clicked",
+        return row;
+    },
+
+    add_result: function(result_view) {
+        let should_make_row =
+            this._rows.length === 0 ||
+            !this.last_row.has_place_for(result_view);
+        if(should_make_row) this._make_new_row();
+
+        this.last_row.add(result_view);
+        result_view.connect("clicked",
             Lang.bind(this, function() {
-                this.emit("activate", result);
+                this.emit("activate", result_view);
             })
         );
     },
@@ -99,7 +183,8 @@ const ResultsView = new Lang.Class({
     },
 
     clear: function() {
-        this._table.destroy_all_children();
+        this.actor.destroy_all_children();
+        this._rows = [];
     },
 
     show: function() {
@@ -116,7 +201,12 @@ const ResultsView = new Lang.Class({
     },
 
     destroy: function() {
+        this.clear();
         this.actor.destroy();
+    },
+
+    get last_row() {
+        return this._rows[this._rows.length - 1];
     }
 });
 Signals.addSignalMethods(ResultsView.prototype);

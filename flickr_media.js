@@ -4,7 +4,7 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const MediaBase = Me.imports.media_base;
 
-const PHOTO_SIZES = {
+const PHOTO_SIZE = {
     SQUARE: 'Square',
     LARGE_SQUARE: 'Large Square',
     THUMBNAIL: 'Thumbnail',
@@ -14,6 +14,30 @@ const PHOTO_SIZES = {
     MEDIUM_640: 'Medium 640',
     ORIGINAL: 'Original'
 };
+
+const FlickrPhotoSize = new Lang.Class({
+    Name: 'FlickrPhotoSize',
+
+    _init: function(data) {
+        this._data = data;
+    },
+
+    get label() {
+        return this._data.label;
+    },
+
+    get width() {
+        return parseInt(this._data.width, 10);
+    },
+
+    get height() {
+        return parseInt(this._data.height, 10);
+    },
+
+    get source() {
+        return this._data.source;
+    }
+});
 
 const FlickrPhotoSizes = new Lang.Class({
     Name: 'FlickrPhotoSizes',
@@ -29,7 +53,7 @@ const FlickrPhotoSizes = new Lang.Class({
             let size = this._sizes[i];
 
             if(size.label === size_label) {
-                result = size;
+                result = new FlickrPhotoSize(size);
                 break;
             }
         }

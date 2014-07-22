@@ -13,7 +13,6 @@ const PopupDialog = Me.imports.popup_dialog;
 const DESCRIPTION_MIN_SCALE = 0.9;
 const DESCRIPTION_ANIMATION_TIME = 0.2;
 
-const IMAGE_MIN_SCALE = 0.8;
 const IMAGE_MAX_SCALE = 1.3;
 const IMAGE_ANIMATION_TIME = 0.3;
 
@@ -167,7 +166,6 @@ const ResultViewBase = new Lang.Class({
                 scale_factor
             );
             this._image_actor.set_pivot_point(0.5, 0.5);
-            this._image_actor.hide();
             this._image_actor.connect(
                 'size-change',
                 Lang.bind(this, this._on_thumbnail_loaded)
@@ -175,6 +173,7 @@ const ResultViewBase = new Lang.Class({
 
             this._image_scroll = new Clutter.ScrollActor();
             this._image_scroll.add_child(this._image_actor);
+            this._image_scroll.hide();
         }
         else {
             this._image_actor = null;
@@ -184,6 +183,14 @@ const ResultViewBase = new Lang.Class({
         this._image_dummy = new St.Icon({
             icon_name: Utils.ICONS.IMAGE_PLACEHOLDER,
             icon_size: DUMMY_ICON_SIZE
+        });
+        this._image_dummy_box = new St.BoxLayout({
+            style: 'background-color: white;'
+        });
+        this._image_dummy_box.add(this._image_dummy, {
+            expand: true,
+            x_align: St.Align.MIDDLE,
+            y_align: St.Align.MIDDLE
         });
 
         let source_label_style =
@@ -198,13 +205,13 @@ const ResultViewBase = new Lang.Class({
         this._source_label.translation_x = 10;
         this._source_label.translation_y = -10;
 
-        this.table.add(this._image_dummy, {
+        this.table.add(this._image_dummy_box, {
             row: 0,
             col: 0,
             x_expand: true,
             y_expand: true,
-            x_fill: false,
-            y_fill: false
+            x_fill: true,
+            y_fill: true
         });
         if(this._image_scroll) {
             this.table.add(this._image_scroll, {
@@ -253,25 +260,22 @@ const ResultViewBase = new Lang.Class({
 
     _on_thumbnail_loaded: function() {
         if(this.params.thumbnail_loaded_animation) {
-            this._image_actor.set_opacity(0);
-            this._image_actor.set_scale(IMAGE_MIN_SCALE, IMAGE_MIN_SCALE);
-            this._image_actor.show();
+            this._image_scroll.set_opacity(0);
+            this._image_scroll.show();
 
-            Tweener.removeTweens(this._image_actor);
-            Tweener.addTween(this._image_actor, {
+            Tweener.removeTweens(this._image_scroll);
+            Tweener.addTween(this._image_scroll, {
                 time: IMAGE_ANIMATION_TIME,
                 transition: 'easeOutQuad',
-                scale_x: 1,
-                scale_y: 1,
                 opacity: 255,
                 onComplete: Lang.bind(this, function() {
-                    this._image_dummy.hide();
+                    this._image_dummy_box.hide();
                 })
             });
         }
         else {
-            this._image_actor.show();
-            this._image_dummy.hide();
+            this._image_scroll.show();
+            this._image_dummy_box.hide();
         }
 
         this.emit('thumbnail-loaded', this._image_actor);
@@ -385,12 +389,14 @@ const ResultViewBase = new Lang.Class({
         if(this._image_actor) this._image_actor.set_width(width);
         if(this._title) this._title.set_width(width);
         if(this._description_box) this._description_box.set_width(width);
+        if(this._image_dummy_box) this._image_dummy_box.set_width(width);
         this.table.set_width(width);
         this.actor.set_width(width);
     },
 
     set_height: function(height) {
         if(this._image_actor) this._image_actor.set_height(height);
+        if(this._image_dummy_box) this._image_dummy_box.set_height(height);
         this.table.set_height(height);
         this.actor.set_height(height);
     },

@@ -5,6 +5,7 @@ const Clutter = imports.gi.Clutter;
 const Pango = imports.gi.Pango;
 const Params = imports.misc.params;
 const Tweener = imports.ui.tweener;
+const GLib = imports.gi.GLib;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
@@ -256,22 +257,16 @@ const ResultViewBase = new Lang.Class({
 
         this.set_width(this.params.real_width);
         this.set_height(this.params.real_height);
+
+        this._thumbnail_animation_id = 0;
     },
 
     _on_thumbnail_loaded: function() {
         if(this.params.thumbnail_loaded_animation) {
-            this._image_scroll.set_opacity(0);
-            this._image_scroll.show();
-
-            Tweener.removeTweens(this._image_scroll);
-            Tweener.addTween(this._image_scroll, {
-                time: IMAGE_ANIMATION_TIME,
-                transition: 'easeOutQuad',
-                opacity: 255,
-                onComplete: Lang.bind(this, function() {
-                    this._image_dummy_box.hide();
-                })
-            });
+            this._thumbnail_animation_id = GLib.idle_add(
+                GLib.PRIORITY_LOW,
+                Lang.bind(this, this._animate_show_thumbnail)
+            );
         }
         else {
             this._image_scroll.show();
@@ -279,6 +274,22 @@ const ResultViewBase = new Lang.Class({
         }
 
         this.emit('thumbnail-loaded', this._image_actor);
+    },
+
+    _animate_show_thumbnail: function() {
+        this._image_scroll.set_opacity(0);
+        this._image_scroll.show();
+
+        Tweener.removeTweens(this._image_scroll);
+        Tweener.addTween(this._image_scroll, {
+            time: IMAGE_ANIMATION_TIME,
+            transition: 'easeOutQuad',
+            opacity: 255,
+            onComplete: Lang.bind(this, function() {
+                this._image_dummy_box.hide();
+                this._thumbnail_animation_id = 0;
+            })
+        });
     },
 
     _on_button_press: function(actor, event) {
@@ -402,6 +413,11 @@ const ResultViewBase = new Lang.Class({
     },
 
     destroy: function() {
+        if(this._thumbnail_animation_id != 0) {
+            GLib.source_remove(this._thumbnail_animation_id);
+            this._thumbnail_animation_id = 0;
+        }
+
         if(this.actor) this.actor.destroy();
         this._media = null;
     },

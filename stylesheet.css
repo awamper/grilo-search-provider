@@ -66,3 +66,13 @@
     border: 1px solid #0D4CA3;
     padding: 5px;
 }
+
+.grilo-status-box {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 7px;
+}
+
+.grilo-status-box-text {
+    font-size: 20px;
+    color: white;
+}

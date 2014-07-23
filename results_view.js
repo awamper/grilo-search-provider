@@ -4,55 +4,121 @@ const Signals = imports.signals;
 const Separator = imports.ui.separator;
 const Main = imports.ui.main;
 const Params = imports.misc.params;
+const Tweener = imports.ui.tweener;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
-const ResultViewBase = Me.imports.result_view_base;
-
-const MessageResultView = new Lang.Class({
-    Name: 'GriloMessageResultView',
-    Extends: ResultViewBase.ResultViewBase,
-
-    _init: function(message) {
-        let params = {
-            real_width: 320,
-            real_height: 180,
-            actor_style_class: 'grilo-result-box',
-            table_style_class: 'grilo-content-box',
-            show_description: false
-        };
-        this.parent(null, params);
-
-        this._title = new St.Label({
-            text: 'Grilo Search Provider',
-            style: 'font-size: 23px; padding: 5px;'
-        });
-        this._message = new St.Label({
-            text: message,
-            style: 'font-size: 15px; padding: 10px;'
-        });
-
-        this.table.add(this._title, {
-            row: 0,
-            col: 0,
-            x_expand: false,
-            y_expand: false
-        })
-        this.table.add(this._message, {
-            row: 1,
-            col: 0,
-            x_align: St.Align.START,
-            y_align: St.Align.START,
-            x_expand: true,
-            y_expand: true
-        });
-    }
-});
 
 const CONNECTION_IDS = {
     OVERVIEW_HIDING: 0
 };
+
+const StatusBox = new Lang.Class({
+    Name: 'GriloResultsView.StatusBox',
+
+    _init: function(params) {
+        this.params = Params.parse(params, {
+            min_scale: 0.7,
+            padding: 20,
+            box_style_class: '',
+            label_style_class: ''
+        });
+        this.actor = new St.BoxLayout({
+            vertical: false,
+            style_class: this.params.box_style_class
+        });
+        this.actor.hide();
+
+        this._message = new St.Label({
+            text: '...',
+            style_class: this.params.label_style_class
+        });
+
+        this.actor.add_child(this._message);
+
+        this._minimized = false;
+        this._shown = false;
+
+        Main.uiGroup.add_child(this.actor);
+    },
+
+    _set_position: function(x, y, animate) {
+        if(!animate) {
+            this.actor.translation_x = x;
+            this.actor.translation_y = y;
+            return;
+        }
+
+        Tweener.removeTweens(this.actor);
+        Tweener.addTween(this.actor, {
+            time: 0.5,
+            transition: 'easeOutQuad',
+            translation_x: x,
+            translation_y: y
+        });
+    },
+
+    _reposition: function() {
+        let monitor = Main.layoutManager.currentMonitor;
+        let x, y;
+
+        if(!this._minimized) {
+            x = Math.floor(monitor.width / 2 - this.actor.width / 2);
+            y = Math.floor(monitor.height / 2 - this.actor.height / 2);
+        }
+        else {
+            x = Math.floor(
+                monitor.width - this.actor.width * this.params.min_scale
+            );
+            y = Math.floor(
+                monitor.height - this.actor.height * this.params.min_scale
+            );
+        }
+
+        this._set_position(x, y, this._shown);
+    },
+
+    show: function() {
+        if(this._shown) return;
+
+        this._shown = true;
+        this._reposition();
+        this.actor.show();
+
+        Main.uiGroup.set_child_above_sibling(this.actor, null);
+    },
+
+    hide: function() {
+        if(!this._shown) return;
+
+        this._shown = false;
+        this.actor.hide();
+    },
+
+    minimize: function() {
+        if(this._minimized) return;
+        this.actor.set_scale(this.params.min_scale, this.params.min_scale);
+        this._minimized = true;
+        this._reposition();
+    },
+
+    maximize: function() {
+        if(!this._minimized) return;
+        this.actor.set_scale(1, 1);
+        this._minimized = false;
+        this._reposition();
+    },
+
+    destroy: function() {
+        this.actor.destroy();
+    },
+
+    set text(text) {
+        this._message.set_text(text);
+        this._reposition();
+    }
+});
 
 const ResultRow = new Lang.Class({
     Name: 'GriloResultsView.ResultRow',
@@ -174,6 +240,10 @@ const ResultsView = new Lang.Class({
         this.actor.add_actor(this._box);
 
         this._rows = [];
+        this._status_box = new StatusBox({
+            box_style_class: 'grilo-status-box',
+            label_style_class: 'grilo-status-box-text'
+        });
     },
 
     _make_new_row: function() {
@@ -265,6 +335,7 @@ const ResultsView = new Lang.Class({
     },
 
     clear: function() {
+        this._status_box.hide();
         this._box.destroy_all_children();
         this._rows = [];
     },
@@ -283,18 +354,18 @@ const ResultsView = new Lang.Class({
         if(Main.uiGroup.contains(this.actor)) Main.uiGroup.remove_child(this.actor);
     },
 
-    show_message: function(message) {
-        let view = new MessageResultView(message);
-        this.set_results([view]);
-    },
-
     destroy: function() {
         this.clear();
+        this._status_box.destroy();
         this.actor.destroy();
     },
 
     get last_row() {
         return this._rows[this._rows.length - 1];
+    },
+
+    get status_box() {
+        return this._status_box;
     }
 });
 Signals.addSignalMethods(ResultsView.prototype);

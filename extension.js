@@ -78,6 +78,7 @@ const GriloSearchProvider = new Lang.Class({
         );
 
         this._n_results = 0;
+        this._n_total_results = 0;
         this._search_id = -1;
         this._block_search_trigger = false;
         this._new_search = true;
@@ -131,7 +132,7 @@ const GriloSearchProvider = new Lang.Class({
         if(symbol === Clutter.BackSpace && !Utils.is_blank(query.term)) {
             this._cancel_search();
             this._block_search_trigger = true;
-            this.show_message("Enter your query");
+            this.show_message("Enter your query", false);
         }
         else if(ch) {
             this._start_search(query);
@@ -201,15 +202,14 @@ const GriloSearchProvider = new Lang.Class({
         }
 
         if(remaining === 0) {
-            if(this._n_results === 0) {
-                let nothing_found_msg =
-                    'Your search did not match any documents.';
-                this.show_message(nothing_found_msg);
-            }
-
             this._search_id = -1;
-        }
 
+            if(this._new_search) {
+                this._grilo_display.status_box.maximize();
+                let nothing_found_msg = 'Your search did not match any documents.';
+                this.show_message(nothing_found_msg, false);
+            }
+        }
         if(!media) return;
 
         // let result = {
@@ -227,12 +227,9 @@ const GriloSearchProvider = new Lang.Class({
         // log(JSON.stringify(result, null, '\t'));
 
         if(this._new_search) {
-            this._n_results = 1;
+            this._n_total_results = remaining + 1;
             this._grilo_display.clear();
             this._new_search = false;
-        }
-        else {
-            this._n_results++;
         }
 
         let source_id = media.get_source();
@@ -324,7 +321,8 @@ const GriloSearchProvider = new Lang.Class({
         }
 
         this.show_message(
-            'Search %s for "%s"'.format(result_names.join(', '), query.term)
+            'Search %s for "%s"'.format(result_names.join(', '), query.term),
+            false
         );
 
         TIMEOUT_IDS.SEARCH = Mainloop.timeout_add(
@@ -332,22 +330,35 @@ const GriloSearchProvider = new Lang.Class({
             Lang.bind(this, function() {
                 this._remove_timeout();
                 this._grilo_display.show();
-                this.show_message(
-                    'Searching %s for "%s"...'.format(
-                        result_names.join(', '),
-                        query.term
-                    )
+                let msg = 'Searching %s for "%s"...'.format(
+                    result_names.join(', '),
+                    query.term
                 );
+                this.show_message(msg, false);
                 this._search(query, result_sources);
             })
         );
     },
 
     _show_result: function(source_media, source_id) {
-        this._grilo_display.show();
+        this._n_results++;
+        if(!source_media) return;
 
+        this._grilo_display.show();
         let display = new VIEWS[source_id](source_media);
         this._grilo_display.add_result(display);
+
+        this._grilo_display.status_box.show();
+        this._grilo_display.status_box.minimize();
+        let msg = '%s of %s loaded'.format(
+            this._n_results,
+            this._n_total_results
+        );
+        this.show_message(msg, true)
+
+        if(this._n_total_results === this._n_results) {
+            this._grilo_display.status_box.hide()
+        }
     },
 
     _animate_activation: function(result_view) {
@@ -385,8 +396,13 @@ const GriloSearchProvider = new Lang.Class({
         this._animate_activation(result_view);
     },
 
-    show_message: function(message) {
-        this._grilo_display.show_message(message);
+    show_message: function(message, minimize) {
+        minimize = minimize || false;
+        this._grilo_display.status_box.text = message;
+        this._grilo_display.status_box.show();
+
+        if(minimize) this._grilo_display.status_box.minimize();
+        else this._grilo_display.status_box.maximize();
     },
 
     enable: function() {

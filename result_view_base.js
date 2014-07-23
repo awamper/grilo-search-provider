@@ -264,7 +264,7 @@ const ResultViewBase = new Lang.Class({
     _on_thumbnail_loaded: function() {
         if(this.params.thumbnail_loaded_animation) {
             this._thumbnail_animation_id = GLib.idle_add(
-                GLib.PRIORITY_DEFAULT_IDLE + 20,
+                GLib.PRIORITY_HIGH_IDLE,
                 Lang.bind(this, this._animate_show_thumbnail)
             );
         }

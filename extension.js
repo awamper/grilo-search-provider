@@ -344,9 +344,10 @@ const GriloSearchProvider = new Lang.Class({
         this._n_results++;
         if(!source_media) return;
 
+        let is_last = this._n_total_results === this._n_results;
         this._grilo_display.show();
         let display = new VIEWS[source_id](source_media);
-        this._grilo_display.add_result(display);
+        this._grilo_display.add_result(display, is_last);
 
         this._grilo_display.status_box.show();
         this._grilo_display.status_box.minimize();
@@ -355,10 +356,7 @@ const GriloSearchProvider = new Lang.Class({
             this._n_total_results
         );
         this.show_message(msg, true)
-
-        if(this._n_total_results === this._n_results) {
-            this._grilo_display.status_box.hide()
-        }
+        if(is_last) this._grilo_display.status_box.hide()
     },
 
     _animate_activation: function(result_view) {

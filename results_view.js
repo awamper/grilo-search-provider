@@ -253,6 +253,7 @@ const ResultsView = new Lang.Class({
         let row = new ResultRow({
             max_width: width - padding.left - padding.right
         });
+        row.hide();
         this._rows.push(row);
         this._box.add(row.actor, {
             x_expand: true,
@@ -315,11 +316,15 @@ const ResultsView = new Lang.Class({
         this.actor.set_position(x, y);
     },
 
-    add_result: function(result_view) {
+    add_result: function(result_view, is_last) {
         let should_make_row =
             this._rows.length === 0 ||
             !this.last_row.has_place_for(result_view);
-        if(should_make_row) this._make_new_row();
+        if(should_make_row) {
+            if(this.last_row) this.last_row.show();
+            this._make_new_row();
+        }
+        if(is_last && this.last_row) this.last_row.show();
 
         this.last_row.add(result_view);
         result_view.connect("clicked",

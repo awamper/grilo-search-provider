@@ -72,13 +72,12 @@ const FlickrMedia = new Lang.Class({
         Utils.flickr_get_photo_sizes(this.id,
             Lang.bind(this, function(result) {
                 if(!result) {
-                    this.sizes = new FlickrPhotoSizes({});
+                    this._ready_callback(false);
                 }
                 else {
                     this.sizes = new FlickrPhotoSizes(result);
+                    this._ready_callback(this);
                 }
-
-                this._ready_callback(this);
             })
         );
     },

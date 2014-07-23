@@ -251,7 +251,7 @@ const ResultsView = new Lang.Class({
         let padding = this._get_padding();
 
         let row = new ResultRow({
-            max_width: width - padding.left - padding.right
+            max_width: width
         });
         row.hide();
         this._rows.push(row);

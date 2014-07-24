@@ -1,15 +1,10 @@
 const St = imports.gi.St;
 const Lang = imports.lang;
 const Params = imports.misc.params;
-const Main = imports.ui.main;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
-
-const CONNECTION_IDS = {
-    OVERVIEW_HIDING: 0
-};
 
 const ResultsViewRow = new Lang.Class({
     Name: 'GriloResultsView.ResultsViewRow',
@@ -96,11 +91,6 @@ const ResultsViewRow = new Lang.Class({
     },
 
     destroy: function() {
-        if(CONNECTION_IDS.OVERVIEW_HIDING > 0) {
-            Main.overview.disconnect(CONNECTION_IDS.OVERVIEW_HIDING);
-            CONNECTION_IDS.OVERVIEW_HIDING = 0;
-        }
-
         if(this.actor) this.actor.destroy();
         this._items = [];
         this._relative_widths = [];

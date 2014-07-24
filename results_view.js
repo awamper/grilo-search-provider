@@ -11,6 +11,10 @@ const PrefsKeys = Me.imports.prefs_keys;
 const ResultsStatusBox = Me.imports.results_status_box;
 const ResultsViewRow = Me.imports.results_view_row;
 
+const CONNECTION_IDS = {
+    OVERVIEW_HIDING: 0
+};
+
 const ResultsView = new Lang.Class({
     Name: 'GriloResultsView',
 
@@ -29,6 +33,13 @@ const ResultsView = new Lang.Class({
             box_style_class: 'grilo-status-box',
             label_style_class: 'grilo-status-box-text'
         });
+
+        Main.uiGroup.add_child(this.actor);
+
+        CONNECTION_IDS.OVERVIEW_HIDING = Main.overview.connect(
+            'hiding',
+            Lang.bind(this, this.hide)
+        );
     },
 
     _make_new_row: function() {
@@ -132,7 +143,7 @@ const ResultsView = new Lang.Class({
 
     show: function() {
         Main.overview.viewSelector._searchResults.actor.hide();
-        if(!Main.uiGroup.contains(this.actor)) Main.uiGroup.add_child(this.actor);
+        Main.uiGroup.set_child_above_sibling(this.actor, null);
         this._resize();
         this._reposition();
         this.actor.show();
@@ -141,10 +152,14 @@ const ResultsView = new Lang.Class({
     hide: function() {
         Main.overview.viewSelector._searchResults.actor.show();
         this.actor.hide();
-        if(Main.uiGroup.contains(this.actor)) Main.uiGroup.remove_child(this.actor);
     },
 
     destroy: function() {
+        if(CONNECTION_IDS.OVERVIEW_HIDING > 0) {
+            Main.overview.disconnect(CONNECTION_IDS.OVERVIEW_HIDING);
+            CONNECTION_IDS.OVERVIEW_HIDING = 0;
+        }
+
         this.clear();
         this._status_box.destroy();
         this.actor.destroy();

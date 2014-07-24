@@ -132,6 +132,7 @@ const GriloSearchProvider = new Lang.Class({
         if(symbol === Clutter.BackSpace && !Utils.is_blank(query.term)) {
             this._cancel_search();
             this._block_search_trigger = true;
+            this._grilo_display.clear();
             this.show_message("Enter your query", false);
         }
         else if(ch) {
@@ -234,7 +235,6 @@ const GriloSearchProvider = new Lang.Class({
 
         if(this._new_search) {
             this._n_total_results = remaining + 1;
-            this._grilo_display.clear();
             this._new_search = false;
         }
 

@@ -126,7 +126,8 @@ const ResultRow = new Lang.Class({
     _init: function(params) {
         this.params = Params.parse(params, {
             max_width: 960,
-            default_height: 200
+            default_height: 200,
+            max_ratio: 1.2
         });
 
         this.actor = new St.BoxLayout({
@@ -152,8 +153,6 @@ const ResultRow = new Lang.Class({
         this._relative_widths = [];
         this._total_relative_width = 0;
 
-        if(this.n_items == 1) return;
-
         for each(let item in this._items) {
             let thumb_width = item.real_width;
             let thumb_height = item.real_height;
@@ -170,6 +169,7 @@ const ResultRow = new Lang.Class({
         }
 
         let ratio = this.params.max_width / this._total_relative_width;
+        if(ratio > this.params.max_ratio) ratio = this.params.max_ratio;
 
         for (let i in this._items) {
             let item = this._items[i];

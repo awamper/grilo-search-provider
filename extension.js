@@ -367,6 +367,7 @@ const GriloSearchProvider = new Lang.Class({
 
     _animate_activation: function(result_view) {
         Main.overview.toggle();
+        this._grilo_display.actor.hide();
         [x, y] = result_view.actor.get_transformed_position();
         let clone = new Clutter.Clone({
             source: result_view.actor,
@@ -386,6 +387,7 @@ const GriloSearchProvider = new Lang.Class({
             transition: 'easeInExpo',
             onComplete: Lang.bind(this, function() {
                 clone.destroy();
+                this._grilo_display.hide();
             })
         });
     },

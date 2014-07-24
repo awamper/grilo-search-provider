@@ -20,7 +20,8 @@ const VimeoMedia = Me.imports.vimeo_media;
 
 const CONNECTION_IDS = {
     KEY_RELEASE: 0,
-    TEXT_CHANGED: 0
+    TEXT_CHANGED: 0,
+    OVERVIEW_SHOWN: 0
 };
 
 const TIMEOUT_IDS = {
@@ -82,6 +83,8 @@ const GriloSearchProvider = new Lang.Class({
         this._search_id = -1;
         this._block_search_trigger = false;
         this._new_search = true;
+        this._last_query = null;
+        this._show_last_results_trigger = false;
 
         CONNECTION_IDS.KEY_RELEASE =
             Main.overview._searchEntry.clutter_text.connect(
@@ -93,6 +96,20 @@ const GriloSearchProvider = new Lang.Class({
                 "text-changed",
                 Lang.bind(this, this._on_text_changed)
             );
+        CONNECTION_IDS.OVERVIEW_SHOWN =
+            Main.overview.connect(
+                'shown',
+                Lang.bind(this, this._on_overview_shown)
+            );
+    },
+
+    _on_overview_shown: function() {
+        if(!this._show_last_results_trigger) return;
+
+        this._block_search_trigger = true;
+        this._show_last_results_trigger = false;
+        Main.overview._searchEntry.set_text(this._last_query);
+        this._grilo_display.show();
     },
 
     _configure_plugins: function() {
@@ -144,7 +161,7 @@ const GriloSearchProvider = new Lang.Class({
         if(Utils.is_empty_entry(Main.overview._searchEntry)) {
             this._cancel_search();
             this._remove_timeout();
-            this._grilo_display.clear();
+            if(!this._show_last_results_trigger) this._grilo_display.clear();
             this._grilo_display.hide();
         }
     },
@@ -287,6 +304,9 @@ const GriloSearchProvider = new Lang.Class({
         this._remove_timeout();
         if(Utils.is_blank(query.term)) return;
 
+        this._last_query = Main.overview._searchEntry.get_text();
+        this._show_last_results_trigger = false;
+
         let sources = Grl.Registry.get_default().get_sources(true)
         let result_sources = [];
         let result_names = [];
@@ -367,7 +387,6 @@ const GriloSearchProvider = new Lang.Class({
 
     _animate_activation: function(result_view) {
         Main.overview.toggle();
-        this._grilo_display.actor.hide();
 
         result_view.block_leave = true;
         [x, y] = result_view.actor.get_transformed_position();
@@ -390,12 +409,12 @@ const GriloSearchProvider = new Lang.Class({
             onComplete: Lang.bind(this, function() {
                 clone.destroy();
                 result_view.block_leave = false;
-                this._grilo_display.hide();
             })
         });
     },
 
     _on_activate: function(object, result_view) {
+        this._show_last_results_trigger = true;
         if(!result_view.media.external_url) return;
 
         Gio.app_info_launch_default_for_uri(
@@ -432,6 +451,10 @@ const GriloSearchProvider = new Lang.Class({
                 CONNECTION_IDS.TEXT_CHANGED
             );
             CONNECTION_IDS.TEXT_CHANGED = 0;
+        }
+        if(CONNECTION_IDS.OVERVIEW_SHOWN > 0) {
+            Main.overview.disconnect(CONNECTION_IDS.OVERVIEW_SHOWN);
+            CONNECTION_IDS.OVERVIEW_SHOWN = 0;
         }
 
         this._grilo_display.destroy();

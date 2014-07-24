@@ -259,6 +259,8 @@ const ResultViewBase = new Lang.Class({
         this.set_height(this.params.real_height);
 
         this._thumbnail_animation_id = 0;
+        this.block_enter = false;
+        this.block_leave = false;
     },
 
     _on_thumbnail_loaded: function() {
@@ -314,11 +316,13 @@ const ResultViewBase = new Lang.Class({
     },
 
     _on_enter: function() {
+        if(this.block_enter) return;
         this._show_description();
         this._zoom_thumb_in();
     },
 
     _on_leave: function() {
+        if(this.block_leave) return;
         this._hide_description();
         this._zoom_thumb_out();
     },

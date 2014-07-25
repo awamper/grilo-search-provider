@@ -267,6 +267,11 @@ const GriloSearchProviderPrefsWidget = new GObject.Class({
             'int'
         );
 
+        page.add_boolean(
+            'Remember last search:',
+            PrefsKeys.REMEMBER_LAST_SEARCH
+        );
+
         let result = {
             name: name,
             page: page

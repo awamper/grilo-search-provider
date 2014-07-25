@@ -435,7 +435,9 @@ const GriloSearchProvider = new Lang.Class({
 
             Utils.launch_vlc(urls_array,
                 Lang.bind(this, function() {
-                    Main.overview.toggle();
+                    if(Utils.SETTINGS.get_boolean(PrefsKeys.REMEMBER_LAST_SEARCH)) {
+                        Main.overview.toggle();
+                    }
                 })
             );
         }

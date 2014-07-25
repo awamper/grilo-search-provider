@@ -105,6 +105,7 @@ const GriloSearchProvider = new Lang.Class({
 
     _on_overview_shown: function() {
         if(!this._show_last_results_trigger) return;
+        if(!Utils.SETTINGS.get_boolean(PrefsKeys.REMEMBER_LAST_SEARCH)) return;
 
         this._block_search_trigger = true;
         this._show_last_results_trigger = false;
@@ -413,14 +414,32 @@ const GriloSearchProvider = new Lang.Class({
         });
     },
 
-    _on_activate: function(object, result_view) {
+    _on_activate: function(object, button, result_view) {
         this._show_last_results_trigger = true;
         if(!result_view.media.external_url) return;
 
-        Gio.app_info_launch_default_for_uri(
-            result_view.media.external_url,
-            global.create_app_launch_context(0, -1)
-        );
+        if(button === Clutter.BUTTON_PRIMARY) {
+            Gio.app_info_launch_default_for_uri(
+                result_view.media.external_url,
+                global.create_app_launch_context(0, -1)
+            );
+        }
+        else if(button === Clutter.BUTTON_SECONDARY) {
+            let views = this._grilo_display.result_views;
+            let urls_array = [result_view.media.url];
+
+            for each(let view in views) {
+                if(view === result_view) continue;
+                urls_array.push(view.media.url);
+            }
+
+            Utils.launch_vlc(urls_array,
+                Lang.bind(this, function() {
+                    Main.overview.toggle();
+                })
+            );
+        }
+
         this._animate_activation(result_view);
     },
 

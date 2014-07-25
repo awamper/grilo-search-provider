@@ -124,8 +124,8 @@ const ResultsView = new Lang.Class({
 
         this.last_row.add(result_view);
         result_view.connect("clicked",
-            Lang.bind(this, function() {
-                this.emit("activate", result_view);
+            Lang.bind(this, function(object, button) {
+                this.emit("activate", button, result_view);
             })
         );
     },
@@ -171,6 +171,12 @@ const ResultsView = new Lang.Class({
 
     get status_box() {
         return this._status_box;
+    },
+
+    get result_views() {
+        let result = [];
+        for each(let row in this._rows) result = result.concat(row.items);
+        return result;
     }
 });
 Signals.addSignalMethods(ResultsView.prototype);

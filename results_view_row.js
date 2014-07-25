@@ -99,5 +99,9 @@ const ResultsViewRow = new Lang.Class({
 
     get n_items() {
         return this._items.length;
+    },
+
+    get items() {
+        return this._items;
     }
 });

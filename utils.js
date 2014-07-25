@@ -1,5 +1,6 @@
 const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
+const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Soup = imports.gi.Soup;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -19,6 +20,35 @@ HTTP_SESSION.timeout = 10;
 const ICONS = {
     IMAGE_PLACEHOLDER: 'camera-photo-symbolic'
 };
+
+function launch_vlc(urls_array, callback) {
+    let args = ['vlc', '-f'].concat(urls_array);
+    let [success, pid] = GLib.spawn_async(
+        null,
+        args,
+        null,
+        GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+        null
+    );
+
+    if(!success) {
+        callback(false);
+        return;
+    }
+
+    GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid,
+        function(pid, status) {
+            GLib.spawn_close_pid(pid);
+
+            if(status != 0) {
+                callback(false);
+            }
+            else {
+                callback(true);
+            }
+        }
+    );
+}
 
 function flickr_get_photo_sizes(photo_id, callback) {
     let base_url = 'https://api.flickr.com/services/rest';

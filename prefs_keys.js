@@ -10,3 +10,4 @@ const RESULTS_PADDING_RIGHT = 'results-padding-right';
 const RESULTS_PADDING_TOP = 'results-padding-top';
 const RESULTS_PADDING_BOTTOM = 'results-padding-bottom';
 const RESULTS_SPACING = 'results-spacing';
+const REMEMBER_LAST_SEARCH = 'remember-last-search';

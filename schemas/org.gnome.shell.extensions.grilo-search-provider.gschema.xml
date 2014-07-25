@@ -59,5 +59,9 @@
       <default>'Medium'</default>
     </key>
 
+    <key type="b" name="always-show-description">
+      <default>false</default>
+    </key>
+
   </schema>
 </schemalist>

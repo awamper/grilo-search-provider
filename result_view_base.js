@@ -154,7 +154,9 @@ const ResultViewBase = new Lang.Class({
             x_align: St.Align.MIDDLE,
             y_align: St.Align.MIDDLE
         });
-        this._description_box.hide();
+        if(!Utils.SETTINGS.get_boolean(PrefsKeys.ALWAYS_SHOW_DESCRIPTION)) {
+            this._description_box.hide();
+        }
 
         let thumbnail_url;
         let user_thumbnails_size = Utils.SETTINGS.get_string(
@@ -322,13 +324,21 @@ const ResultViewBase = new Lang.Class({
 
     _on_enter: function() {
         if(this.block_enter) return;
-        this._show_description();
+
+        if(!Utils.SETTINGS.get_boolean(PrefsKeys.ALWAYS_SHOW_DESCRIPTION)) {
+            this._show_description();
+        }
+
         this._zoom_thumb_in();
     },
 
     _on_leave: function() {
         if(this.block_leave) return;
-        this._hide_description();
+        
+        if(!Utils.SETTINGS.get_boolean(PrefsKeys.ALWAYS_SHOW_DESCRIPTION)) {
+            this._hide_description();
+        }
+
         this._zoom_thumb_out();
     },
 

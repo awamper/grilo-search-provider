@@ -286,6 +286,11 @@ const GriloSearchProviderPrefsWidget = new GObject.Class({
             'string'
         );
 
+        page.add_boolean(
+            'Always show description:',
+            PrefsKeys.ALWAYS_SHOW_DESCRIPTION
+        );
+
         let result = {
             name: name,
             page: page

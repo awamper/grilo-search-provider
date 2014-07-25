@@ -12,3 +12,4 @@ const RESULTS_PADDING_BOTTOM = 'results-padding-bottom';
 const RESULTS_SPACING = 'results-spacing';
 const REMEMBER_LAST_SEARCH = 'remember-last-search';
 const THUMBNAILS_SIZE = 'thumbnails-size';
+const ALWAYS_SHOW_DESCRIPTION = 'always-show-description';

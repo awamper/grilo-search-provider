@@ -5,15 +5,28 @@ const Tweener = imports.ui.tweener;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const ResultViewBase = Me.imports.result_view_base;
 const FlickrMedia = Me.imports.flickr_media;
+const Utils = Me.imports.utils;
+const PrefsKeys = Me.imports.prefs_keys;
 
 const FlickrResultView = new Lang.Class({
     Name: 'FlickrResultView',
     Extends: ResultViewBase.ResultViewBase,
 
     _init: function(flickr_media) {
-        let size_info = flickr_media.sizes.get(
-            FlickrMedia.PHOTO_SIZE.SMALL_320
-        );
+        let photos_size;
+        let user_size = Utils.SETTINGS.get_string(PrefsKeys.THUMBNAILS_SIZE);
+
+        if(user_size === Utils.THUMBNAIL_SIZES.MEDIUM) {
+            photos_size = FlickrMedia.PHOTO_SIZE.SMALL_320;
+        }
+        else if(user_size === Utils.THUMBNAIL_SIZES.BIG) {
+            photos_size = FlickrMedia.PHOTO_SIZE.MEDIUM;
+        }
+        else {
+            photos_size = FlickrMedia.PHOTO_SIZE.SMALL;
+        }
+
+        let size_info = flickr_media.sizes.get(photos_size);
 
         let params = {
             real_width: size_info.width,

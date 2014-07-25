@@ -23,8 +23,16 @@ const MediaBase = new Lang.Class({
         return this._grilo_media.get_description();
     },
 
+    get small_thumbnail() {
+        return this.thumbnaill;
+    },
+
     get thumbnail() {
         return this._grilo_media.get_thumbnail();
+    },
+
+    get big_thumbnail() {
+        return this.thumbnail;
     },
 
     get url() {

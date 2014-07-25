@@ -10,6 +10,7 @@ const GLib = imports.gi.GLib;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const PopupDialog = Me.imports.popup_dialog;
+const PrefsKeys = Me.imports.prefs_keys;
 
 const DESCRIPTION_MIN_SCALE = 0.9;
 const DESCRIPTION_ANIMATION_TIME = 0.2;
@@ -155,13 +156,28 @@ const ResultViewBase = new Lang.Class({
         });
         this._description_box.hide();
 
-        if(this._media.thumbnail) {
+        let thumbnail_url;
+        let user_thumbnails_size = Utils.SETTINGS.get_string(
+            PrefsKeys.THUMBNAILS_SIZE
+        );
+
+        if(user_thumbnails_size === Utils.THUMBNAIL_SIZES.SMALL) {
+            thumbnail_url = this._media.small_thumbnail;
+        }
+        else if(user_thumbnails_size === Utils.THUMBNAIL_SIZES.BIG) {
+            thumbnail_url = this._media.big_thumbnail;
+        }
+        else {
+            thumbnail_url = this._media.thumbnail;
+        }
+
+        if(thumbnail_url) {
             let scale_factor =
                 St.ThemeContext.get_for_stage(global.stage).scale_factor;
             let texture_cache = St.TextureCache.get_default();
 
             this._image_actor = texture_cache.load_uri_async(
-                this._media.thumbnail,
+                thumbnail_url,
                 this.params.real_width,
                 this.params.real_height,
                 scale_factor

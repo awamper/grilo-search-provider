@@ -12,13 +12,25 @@ const YoutubeMedia = new Lang.Class({
         this._ready_callback(this);
     },
 
-    get thumbnail() {
+    _replace_url: function(new_name) {
         let thumbnail_url = this._grilo_media.get_thumbnail();
         thumbnail_url =
             thumbnail_url.slice(0,
                 thumbnail_url.lastIndexOf('/')
-            ) + '/mqdefault.jpg';
+            ) + '/%s'.format(new_name);
         return thumbnail_url;
+    },
+
+    get small_thumbnail() {
+        return this._replace_url('mqdefault.jpg');
+    },
+
+    get thumbnail() {
+        return this._replace_url('mqdefault.jpg');
+    },
+
+    get big_thumbnail() {
+        return this._replace_url('hqdefault.jpg');
     },
 
     get url() {

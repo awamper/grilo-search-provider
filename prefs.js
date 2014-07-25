@@ -272,6 +272,20 @@ const GriloSearchProviderPrefsWidget = new GObject.Class({
             PrefsKeys.REMEMBER_LAST_SEARCH
         );
 
+        let sizes = [];
+        for each(let size in Utils.THUMBNAIL_SIZES) {
+            sizes.push({
+                title: size,
+                value: size
+            });
+        }
+        page.add_combo(
+            'Thumbnails size:',
+            PrefsKeys.THUMBNAILS_SIZE,
+            sizes,
+            'string'
+        );
+
         let result = {
             name: name,
             page: page

@@ -2,6 +2,7 @@ const Lang = imports.lang;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const MediaBase = Me.imports.media_base;
+const Utils = Me.imports.utils;
 
 const VimeoMedia = new Lang.Class({
     Name: 'VimeoMedia',
@@ -12,10 +13,34 @@ const VimeoMedia = new Lang.Class({
         this._ready_callback(this);
     },
 
-    get thumbnail() {
+    _replace_url: function(new_resolution) {
         let thumbnail_url = this._grilo_media.get_thumbnail();
-        let bigger_url = thumbnail_url.replace(/([0-9]+x[0-9]+)/g, '320x180');
-        return bigger_url;
+        thumbnail_url = thumbnail_url.replace(/([0-9]+x[0-9]+)/g, new_resolution);
+        return thumbnail_url;
+    },
+
+    get small_thumbnail() {
+        let resolution = '%sx%s'.format(
+            Utils.THUMBNAIL_RESOLUTIONS[Utils.THUMBNAIL_SIZES.MEDIUM].W,
+            Utils.THUMBNAIL_RESOLUTIONS[Utils.THUMBNAIL_SIZES.MEDIUM].H
+        );
+        return this._replace_url(resolution);
+    },
+
+    get thumbnail() {
+        let resolution = '%sx%s'.format(
+            Utils.THUMBNAIL_RESOLUTIONS[Utils.THUMBNAIL_SIZES.MEDIUM].W,
+            Utils.THUMBNAIL_RESOLUTIONS[Utils.THUMBNAIL_SIZES.MEDIUM].H
+        );
+        return this._replace_url(resolution);
+    },
+
+    get big_thumbnail() {
+        let resolution = '%sx%s'.format(
+            Utils.THUMBNAIL_RESOLUTIONS[Utils.THUMBNAIL_SIZES.BIG].W,
+            Utils.THUMBNAIL_RESOLUTIONS[Utils.THUMBNAIL_SIZES.BIG].H
+        );
+        return this._replace_url(resolution);
     },
 
     get url() {

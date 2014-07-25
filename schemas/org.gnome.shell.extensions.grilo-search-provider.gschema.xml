@@ -55,5 +55,9 @@
       <default>true</default>
     </key>
 
+    <key type="s" name="thumbnails-size">
+      <default>'Medium'</default>
+    </key>
+
   </schema>
 </schemalist>

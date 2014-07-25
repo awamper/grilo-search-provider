@@ -45,9 +45,13 @@ const ResultsView = new Lang.Class({
     _make_new_row: function() {
         let [width, height] = this._get_size();
         let padding = this._get_padding();
+        let thumbnail_resolution = Utils.THUMBNAIL_RESOLUTIONS[
+            Utils.SETTINGS.get_string(PrefsKeys.THUMBNAILS_SIZE)
+        ];
 
         let row = new ResultsViewRow.ResultsViewRow({
-            max_width: width
+            max_width: width,
+            default_height: thumbnail_resolution.H
         });
         row.hide();
         this._rows.push(row);

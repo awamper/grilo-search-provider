@@ -92,5 +92,17 @@ const FlickrMedia = new Lang.Class({
 
     get description() {
         return this.title;
+    },
+
+    get small_thumbnail() {
+        return this.sizes.get(PHOTO_SIZE.SMALL).source;
+    },
+
+    get thumbnail() {
+        return this.sizes.get(PHOTO_SIZE.SMALL_320).source;
+    },
+
+    get big_thumbnail() {
+        return this.sizes.get(PHOTO_SIZE.MEDIUM).source;
     }
 });

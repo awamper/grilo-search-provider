@@ -21,6 +21,17 @@ const ICONS = {
     IMAGE_PLACEHOLDER: 'camera-photo-symbolic'
 };
 
+const THUMBNAIL_SIZES = {
+    SMALL: 'Small',
+    MEDIUM: 'Medium',
+    BIG: 'Big'
+};
+
+const THUMBNAIL_RESOLUTIONS = {};
+THUMBNAIL_RESOLUTIONS[THUMBNAIL_SIZES.SMALL] = {W: 240, H: 140};
+THUMBNAIL_RESOLUTIONS[THUMBNAIL_SIZES.MEDIUM] = {W: 320, H: 180};
+THUMBNAIL_RESOLUTIONS[THUMBNAIL_SIZES.BIG] = {W: 480, H: 360};
+
 function launch_vlc(urls_array, callback) {
     let args = ['vlc', '-f'].concat(urls_array);
     let [success, pid] = GLib.spawn_async(

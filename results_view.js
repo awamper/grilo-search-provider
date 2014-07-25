@@ -156,6 +156,7 @@ const ResultsView = new Lang.Class({
     hide: function() {
         Main.overview.viewSelector._searchResults.actor.show();
         this.actor.hide();
+        this._status_box.hide();
     },
 
     destroy: function() {

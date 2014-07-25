@@ -110,6 +110,7 @@ const GriloSearchProvider = new Lang.Class({
         this._block_search_trigger = true;
         this._show_last_results_trigger = false;
         Main.overview._searchEntry.set_text(this._last_query);
+        Main.overview._searchEntry.grab_key_focus();
         this._grilo_display.show();
     },
 

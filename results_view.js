@@ -19,8 +19,9 @@ const ResultsView = new Lang.Class({
     Name: 'GriloResultsView',
 
     _init: function() {
-        this.actor = new St.ScrollView();
-        this.actor.hide();
+        this.actor = new St.ScrollView({
+            visible: false
+        });
 
         this._box = new St.BoxLayout({
             vertical: true,
@@ -147,6 +148,7 @@ const ResultsView = new Lang.Class({
 
     show: function() {
         Main.overview.viewSelector._searchResults.actor.hide();
+        Main.overview.viewSelector._searchResults.reset();
         Main.uiGroup.set_child_above_sibling(this.actor, null);
         this._resize();
         this._reposition();

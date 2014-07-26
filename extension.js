@@ -405,7 +405,11 @@ const GriloSearchProvider = new Lang.Class({
             this._n_total_results
         );
         this.show_message(msg, true)
-        if(is_last) this._grilo_display.status_box.hide()
+
+        if(is_last) {
+            this._grilo_display.status_box.hide()
+            this._grilo_display.status_box.maximize();
+        }
     },
 
     _animate_activation: function(result_view) {

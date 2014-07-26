@@ -4,6 +4,7 @@ const Signals = imports.signals;
 const Separator = imports.ui.separator;
 const Main = imports.ui.main;
 const Params = imports.misc.params;
+const Mainloop = imports.mainloop;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
@@ -147,6 +148,11 @@ const ResultsView = new Lang.Class({
     },
 
     show: function() {
+        if(Main.overview.viewSelector._searchTimeoutId > 0) {
+            Mainloop.source_remove(Main.overview.viewSelector._searchTimeoutId);
+            Main.overview.viewSelector._searchTimeoutId = 0;
+        }
+
         Main.overview.viewSelector._searchResults.actor.hide();
         Main.overview.viewSelector._searchResults.reset();
         Main.uiGroup.set_child_above_sibling(this.actor, null);

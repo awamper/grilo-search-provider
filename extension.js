@@ -154,8 +154,18 @@ const GriloSearchProvider = new Lang.Class({
             this._grilo_display.clear();
             this.show_message("Enter your query", false);
         }
-        else if(ch) {
+        else if(symbol == Clutter.Return || symbol == Clutter.KP_Enter) {
+            if(!Utils.SETTINGS.get_boolean(PrefsKeys.SEARCH_ON_ENTER)) return;
             this._start_search(query);
+        }
+        else if(ch && !Utils.is_blank(query.term)) {
+            if(!Utils.SETTINGS.get_boolean(PrefsKeys.SEARCH_ON_ENTER)) {
+                this._start_search(query);
+            }
+            else {
+                let message = 'Press <Enter> to search for "%s"'.format(query.term);
+                this.show_message(message);
+            }
         }
     },
 
@@ -348,24 +358,35 @@ const GriloSearchProvider = new Lang.Class({
             }
         }
 
-        this.show_message(
-            'Search %s for "%s"'.format(result_names.join(', '), query.term),
-            false
-        );
+        if(Utils.SETTINGS.get_boolean(PrefsKeys.SEARCH_ON_ENTER)) {
+            this._search(query, result_sources);
 
-        TIMEOUT_IDS.SEARCH = Mainloop.timeout_add(
-            Utils.SETTINGS.get_int(PrefsKeys.SEARCH_TIMEOUT),
-            Lang.bind(this, function() {
-                this._remove_timeout();
-                this._grilo_display.show();
-                let msg = 'Searching %s for "%s"...'.format(
-                    result_names.join(', '),
-                    query.term
-                );
-                this.show_message(msg, false);
-                this._search(query, result_sources);
-            })
-        );
+            let msg = 'Searching %s for "%s"...'.format(
+                result_names.join(', '),
+                query.term
+            );
+            this.show_message(msg, false);
+        }
+        else {
+            let message = 'Search %s for "%s"'.format(
+                result_names.join(', '),
+                query.term
+            );
+            this.show_message(message);
+
+            TIMEOUT_IDS.SEARCH = Mainloop.timeout_add(
+                Utils.SETTINGS.get_int(PrefsKeys.SEARCH_TIMEOUT),
+                Lang.bind(this, function() {
+                    this._remove_timeout();
+                    let msg = 'Searching %s for "%s"...'.format(
+                        result_names.join(', '),
+                        query.term
+                    );
+                    this.show_message(msg, false);
+                    this._search(query, result_sources);
+                })
+            );
+        }
     },
 
     _show_result: function(source_media, source_id) {
@@ -448,6 +469,7 @@ const GriloSearchProvider = new Lang.Class({
 
     show_message: function(message, minimize) {
         minimize = minimize || false;
+        this._grilo_display.show();
         this._grilo_display.status_box.text = message;
         this._grilo_display.status_box.show();
 

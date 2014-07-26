@@ -13,3 +13,4 @@ const RESULTS_SPACING = 'results-spacing';
 const REMEMBER_LAST_SEARCH = 'remember-last-search';
 const THUMBNAILS_SIZE = 'thumbnails-size';
 const ALWAYS_SHOW_DESCRIPTION = 'always-show-description';
+const SEARCH_ON_ENTER = 'search-on-enter';

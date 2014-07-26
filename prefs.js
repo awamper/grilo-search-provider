@@ -243,17 +243,29 @@ const GriloSearchProviderPrefsWidget = new GObject.Class({
             PrefsKeys.KEYWORD
         );
 
+        let search_on_enter = page.add_boolean(
+            'Press <Enter> to search:',
+            PrefsKeys.SEARCH_ON_ENTER
+        );
+        search_on_enter.connect('notify::active',
+            Lang.bind(this, function(s) {
+                let active = s.get_active();
+                delay.set_sensitive(!active);
+            })
+        );
+
         let adjustment_properties = {
             lower: 100,
             upper: 5000,
             step_increment: 100
         };
         let delay = page.add_spin(
-            'Delay time(ms):',
+            'Search delay time(ms):',
             PrefsKeys.SEARCH_TIMEOUT,
             adjustment_properties,
             'int'
         );
+        delay.set_sensitive(!Utils.SETTINGS.get_boolean(PrefsKeys.SEARCH_ON_ENTER));
 
         adjustment_properties.lower = 1;
         adjustment_properties.upper = Utils.SETTINGS.get_int(

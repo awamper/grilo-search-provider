@@ -63,5 +63,9 @@
       <default>false</default>
     </key>
 
+    <key type="b" name="search-on-enter">
+      <default>true</default>
+    </key>
+
   </schema>
 </schemalist>

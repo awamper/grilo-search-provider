@@ -59,7 +59,7 @@
     background-color: rgba(0, 0, 0, 0.7);
 }
 
-.grilo-copy-url-label {
+.grilo-flash-label {
     background-color: rgba(52, 101, 164, 0.7);
     font-size: 14px;
     color: white;
@@ -74,5 +74,14 @@
 
 .grilo-status-box-text {
     font-size: 20px;
+    color: white;
+}
+
+.grilo-copy-url-button {
+    icon-size: 14px;
+    padding: 2px
+}
+
+.grilo-copy-url-button:active {
     color: white;
 }

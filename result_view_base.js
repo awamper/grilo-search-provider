@@ -6,6 +6,7 @@ const Pango = imports.gi.Pango;
 const Params = imports.misc.params;
 const Tweener = imports.ui.tweener;
 const GLib = imports.gi.GLib;
+const Main = imports.ui.main;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
@@ -20,13 +21,18 @@ const IMAGE_ANIMATION_TIME = 0.3;
 
 const DUMMY_ICON_SIZE = 80;
 
-const CopiedUrlLabel = new Lang.Class({
-    Name: 'CopiedUrlLabel',
+const SOURCE_LABEL_BOTTOM_PADDING = 10;
+const SOURCE_LABEL_LEFT_PADDING = 10;
+
+const COPY_LINK_BUTTON_ANIMATION_TIME = 0.4;
+
+const FlashLabel = new Lang.Class({
+    Name: 'FlashLabel',
     Extends: PopupDialog.PopupDialog,
 
     _init: function(text, x, y) {
         this.parent({
-            style_class: 'grilo-copy-url-label',
+            style_class: 'grilo-flash-label',
             modal: false
         });
 
@@ -42,6 +48,7 @@ const CopiedUrlLabel = new Lang.Class({
     show: function() {
         this._reposition(this._x, this._y);
 
+        Main.uiGroup.set_child_above_sibling(this.actor, null);
         this.actor.set_pivot_point(0.5, 0.5);
         this.actor.set_scale(0.7, 0.7);
         this.actor.set_opacity(0);
@@ -220,11 +227,18 @@ const ResultViewBase = new Lang.Class({
             'color: white;' +
             'padding: 2px;';
         this._source_label = new St.Label({
-            text: this.params.source_label
+            text: this.params.source_label,
+            style: source_label_style
         });
-        this._source_label.set_style(source_label_style);
-        this._source_label.translation_x = 10;
-        this._source_label.translation_y = -10;
+        this._source_label.translation_x = SOURCE_LABEL_LEFT_PADDING;
+        this._source_label.translation_y = -SOURCE_LABEL_BOTTOM_PADDING;
+
+        this._copy_url_button = new St.Icon({
+            icon_name: 'insert-link-symbolic',
+            style_class: 'grilo-copy-url-button',
+            style: 'background-color: %s'.format(this.params.source_label_color),
+            visible: false
+        });
 
         this.table.add(this._image_dummy_box, {
             row: 0,
@@ -249,6 +263,16 @@ const ResultViewBase = new Lang.Class({
             col: 0,
             x_align: St.Align.MIDDLE,
             y_align: St.Align.START,
+            x_expand: false,
+            y_expand: false,
+            x_fill: false,
+            y_fill: false
+        });
+        this.table.add(this._copy_url_button, {
+            row: 0,
+            col: 0,
+            x_align: St.Align.START,
+            y_align: St.Align.END,
             x_expand: false,
             y_expand: false,
             x_fill: false,
@@ -314,14 +338,70 @@ const ResultViewBase = new Lang.Class({
         });
     },
 
+    _show_copy_url_button: function() {
+        if(this._copy_url_button.visible) return;
+
+        this._copy_url_button.set_opacity(0);
+        this._copy_url_button.show();
+        let translation_x =
+            SOURCE_LABEL_LEFT_PADDING +
+            this._source_label.width -
+            this._copy_url_button.width;
+        this._copy_url_button.translation_x = translation_x
+        this._copy_url_button.translation_y = -SOURCE_LABEL_BOTTOM_PADDING;
+
+        Tweener.removeTweens(this._copy_url_button);
+        Tweener.addTween(this._copy_url_button, {
+            time: COPY_LINK_BUTTON_ANIMATION_TIME,
+            transition: 'easeOutQuad',
+            opacity: 255,
+            translation_x: translation_x + this._copy_url_button.width
+        });
+    },
+
+    _hide_copy_url_button: function() {
+        if(!this._copy_url_button.visible) return;
+
+        let translation_x =
+            SOURCE_LABEL_LEFT_PADDING +
+            this._source_label.width;
+
+        Tweener.removeTweens(this._copy_url_button);
+        Tweener.addTween(this._copy_url_button, {
+            time: COPY_LINK_BUTTON_ANIMATION_TIME,
+            transition: 'easeOutQuad',
+            opacity: 0,
+            translation_x: translation_x - this._copy_url_button.width,
+            onComplete: Lang.bind(this, function() {
+                this._copy_url_button.hide();
+                this._copy_url_button.set_opacity(255);
+            })
+        })
+    },
+
     _on_button_press: function(actor, event) {
-        actor.add_style_pseudo_class('active');
+        if(Utils.is_pointer_inside_actor(this._copy_url_button)) {
+            this._copy_url_button.add_style_pseudo_class('active');
+        }
+        else {
+            actor.add_style_pseudo_class('active');
+        }
+
+        return Clutter.EVENT_STOP;
     },
 
     _on_button_release: function(actor, event) {
-        let button = event.get_button();
-        actor.remove_style_pseudo_class('active');
-        this.emit('clicked', button);
+        if(Utils.is_pointer_inside_actor(this._copy_url_button)) {
+            this.copy_url_to_clipboard();
+            this._copy_url_button.remove_style_pseudo_class('active');
+        }
+        else {
+            let button = event.get_button();
+            actor.remove_style_pseudo_class('active');
+            this.emit('clicked', button);
+        }
+
+        return Clutter.EVENT_STOP;
     },
 
     _on_enter: function() {
@@ -331,16 +411,18 @@ const ResultViewBase = new Lang.Class({
             this._show_description();
         }
 
+        this._show_copy_url_button();
         this._zoom_thumb_in();
     },
 
     _on_leave: function() {
         if(this.block_leave) return;
-        
+
         if(!Utils.SETTINGS.get_boolean(PrefsKeys.ALWAYS_SHOW_DESCRIPTION)) {
             this._hide_description();
         }
 
+        this._hide_copy_url_button();
         this._zoom_thumb_out();
     },
 
@@ -413,7 +495,7 @@ const ResultViewBase = new Lang.Class({
         clipboard.set_text(St.ClipboardType.CLIPBOARD, this._media.external_url);
 
         let [x, y] = global.get_pointer();
-        let animated_label = new CopiedUrlLabel(this._media.external_url, x, y);
+        let animated_label = new FlashLabel(this._media.external_url, x, y);
         animated_label.show();
     },
 

@@ -13,6 +13,8 @@ const FlickrResultView = new Lang.Class({
     Extends: ResultViewBase.ResultViewBase,
 
     _init: function(flickr_media) {
+        let description_height_percents =
+            Utils.SETTINGS.get_int(PrefsKeys.DESCRIPTION_HEIGHT_PERCENTS);
         let photos_size;
         let user_size = Utils.SETTINGS.get_string(PrefsKeys.THUMBNAILS_SIZE);
 
@@ -31,7 +33,7 @@ const FlickrResultView = new Lang.Class({
         let params = {
             real_width: size_info.width,
             real_height: size_info.height,
-            description_height: 100,
+            description_height_percents: description_height_percents,
             actor_style_class: 'grilo-result-box',
             table_style_class: 'grilo-content-box',
             title_style_class: 'grilo-title',

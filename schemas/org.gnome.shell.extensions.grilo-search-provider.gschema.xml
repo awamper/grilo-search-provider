@@ -67,5 +67,9 @@
       <default>true</default>
     </key>
 
+    <key type="i" name="description-height-percents">
+      <default>55</default>
+    </key>
+
   </schema>
 </schemalist>

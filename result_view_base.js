@@ -84,7 +84,7 @@ const ResultViewBase = new Lang.Class({
             source_label: '',
             real_width: 300,
             real_height: 300,
-            description_height: 100,
+            description_height_percents: 50,
             thumbnail_loaded_animation: true,
             show_description: true
         });
@@ -143,7 +143,9 @@ const ResultViewBase = new Lang.Class({
 
         this._description_box = new St.BoxLayout({
             style_class: this.params.description_style_class,
-            height: this.params.description_height
+            height: Math.floor(
+                this.params.real_height / 100 * this.params.description_height_percents
+            )
         });
         this._description_box.set_pivot_point(0.5, 0.5);
         this._description_box.add(this._description, {
@@ -427,6 +429,13 @@ const ResultViewBase = new Lang.Class({
     set_height: function(height) {
         if(this._image_actor) this._image_actor.set_height(height);
         if(this._image_dummy_box) this._image_dummy_box.set_height(height);
+
+        if(this._description_box) {
+            this._description_box.set_height(
+                Math.floor(height / 100 * this.params.description_height_percents)
+            );
+        }
+
         this.table.set_height(height);
         this.actor.set_height(height);
     },

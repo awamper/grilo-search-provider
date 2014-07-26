@@ -4,6 +4,8 @@ const Params = imports.misc.params;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const ResultViewBase = Me.imports.result_view_base;
+const Utils = Me.imports.utils;
+const PrefsKeys = Me.imports.prefs_keys;
 
 const RatingView = new Lang.Class({
     Name: 'YoutubeRatingView',
@@ -79,10 +81,12 @@ const YoutubeResultView = new Lang.Class({
     Extends: ResultViewBase.ResultViewBase,
 
     _init: function(youtube_media) {
+        let description_height_percents =
+            Utils.SETTINGS.get_int(PrefsKeys.DESCRIPTION_HEIGHT_PERCENTS);
         let params = {
             real_width: 320,
             real_height: 180,
-            description_height: 100,
+            description_height_percents: description_height_percents,
             actor_style_class: 'grilo-result-box',
             table_style_class: 'grilo-content-box',
             title_style_class: 'grilo-title',

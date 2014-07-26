@@ -111,6 +111,7 @@ const PopupDialog = new Lang.Class({
     show: function(animation) {
         if(this.shown) return;
 
+        Main.uiGroup.set_child_above_sibling(this.actor, null);
         this._reposition();
 
         if(this.params.modal) {

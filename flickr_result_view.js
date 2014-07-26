@@ -30,6 +30,13 @@ const FlickrResultView = new Lang.Class({
 
         let size_info = flickr_media.sizes.get(photos_size);
 
+        if(!size_info) {
+            size_info = {
+                width: Utils.THUMBNAIL_RESOLUTIONS[user_size].W,
+                height: Utils.THUMBNAIL_RESOLUTIONS[user_size].H,
+            };
+        }
+
         let params = {
             real_width: size_info.width,
             real_height: size_info.height,

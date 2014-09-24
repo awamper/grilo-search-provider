@@ -2,7 +2,8 @@
   "description": "Search videos and photos via Youtube, Vimeo and Flickr.\n\nPrimary keyword is \"g\". Additionally there is a keyword for each source - \"y\" for Youtube, \"v\" for Vimeo and \"f\" for Flickr.\n\nAlso \"\\%number\" at the end changes the maximum number of results for the current request.\n\nSearch examples:\n\tg GNOME Shell - search all sources for \"GNOME Shell\"\n\tgyf GNOME Shell - search Youtube and Flickr for \"GNOME Shell\"\n\tgv GNOME Shell\\5 - search Vimeo for \"GNOME Shell\", up to 5 results\n\nLeft-Click - open in the browser.\nRight-Click - open with VLC.\n\nFor other options see Preferences.\nRequires Grilo (https://wiki.gnome.org/Projects/Grilo).",
   "name": "Grilo Search Provider",
   "shell-version": [
-      "3.12"
+      "3.13.92",
+      "3.14"
   ],
   "url": "https://github.com/awamper/grilo-search-provider",
   "uuid": "grilo_search_provider@awamper.gmail.com",
